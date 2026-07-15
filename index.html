@@ -1298,95 +1298,38 @@
         const s = document.getElementById('build-shape').value;
         const d = parseInt(document.getElementById('build-den').value);
         const qty = parseInt(document.getElementById('build-qty').value);
-        const col = document.getElementById('build-color').value;
         
-        if(d < 1 || qty < 1 || qty > 5) {
-            alert(isEnglish ? "Please select valid dimensions." : "Por favor selecciona dimensiones válidas.");
-            return;
-        }
-
-        const container = document.getElementById('shape-container');
-        container.innerHTML = '';
-
-        for (let fig = 0; fig < qty; fig++) {
-            let figBox = document.createElement('div');
-            figBox.style.width = '180px';
-            figBox.style.height = '180px';
-            figBox.style.position = 'relative';
-
-            let svgNS = "http://www.w3.org/2000/svg";
-            let svg = document.createElementNS(svgNS, "svg");
-            svg.setAttribute("width", "100%");
-            svg.setAttribute("height", "100%");
-            svg.setAttribute("viewBox", "0 0 100 100");
-
-            if (s === 'circular') {
-                for (let i = 0; i < d; i++) {
-                    let path = document.createElementNS(svgNS, "path");
-                    let angle1 = (i * 360 / d) * Math.PI / 180;
-                    let angle2 = ((i + 1) * 360 / d) * Math.PI / 180;
-                    let x1 = 50 + 45 * Math.cos(angle1);
-                    let y1 = 50 + 45 * Math.sin(angle1);
-                    let x2 = 50 + 45 * Math.cos(angle2);
-                    let y2 = 50 + 45 * Math.sin(angle2);
-                    
-                    let dAttr = `M 50 50 L ${x1} ${y1} A 45 45 0 ${ (360/d) > 180 ? 1 : 0 } 1 ${x2} ${y2} Z`;
-                    path.setAttribute("d", dAttr);
-                    path.setAttribute("fill", "var(--surface)");
-                    path.setAttribute("stroke", "var(--secondary)");
-                    path.setAttribute("stroke-width", "1.5");
-                    path.setAttribute("class", "canvas-slice");
-                    path.style.cursor = 'pointer';
-                    path.style.transition = 'fill 0.3s';
-                    path.onclick = function() {
-                        playSound('click');
-                        this.classList.toggle('active');
-                        if (this.classList.contains('active')) {
-                            this.setAttribute("fill", col);
-                        } else {
-                            this.setAttribute("fill", "var(--surface)");
-                        }
-                    };
-                    svg.appendChild(path);
+        if(d < 1 || qty < 1 || qty > 5) { alert("Valores inválidos."); return; }
+        
+        let totalHtml = '';
+        for(let q=0; q<qty; q++) {
+            let h = `<svg viewBox="-1 -1 2 2" style="width:250px; height:250px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2)); background: var(--surface); border-radius: ${s==='circular'?'50%':'10px'}; border: 4px solid var(--secondary); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">`;
+            if(s === 'circular') {
+                for(let i=0; i<d; i++) {
+                    let a1=(i*2*Math.PI)/d-Math.PI/2, a2=((i+1)*2*Math.PI)/d-Math.PI/2;
+                    let dPath=d===1?`M -1 0 A 1 1 0 1 1 1 0 A 1 1 0 1 1 -1 0`: (d===2?`M ${Math.cos(a1)} ${Math.sin(a1)} A 1 1 0 0 1 ${Math.cos(a2)} ${Math.sin(a2)} L 0 0 Z`:`M 0 0 L ${Math.cos(a1)} ${Math.sin(a1)} A 1 1 0 0 1 ${Math.cos(a2)} ${Math.sin(a2)} Z`);
+                    h+=`<path d="${dPath}" fill="var(--surface)" stroke="var(--border)" stroke-width="0.04" class="slice" onclick="fillSlice(this)"/>`;
                 }
             } else {
-                // Diseño de división de rebanadas cuadradas
-                const rows = Math.ceil(Math.sqrt(d));
-                const cols = Math.ceil(d / rows);
-                const w = 90 / cols;
-                const h = 90 / rows;
-                let count = 0;
-                for (let r = 0; r < rows; r++) {
-                    for (let c = 0; c < cols; c++) {
-                        if (count >= d) break;
-                        let rect = document.createElementNS(svgNS, "rect");
-                        rect.setAttribute("x", 5 + c * w);
-                        rect.setAttribute("y", 5 + r * h);
-                        rect.setAttribute("width", w - 1);
-                        rect.setAttribute("height", h - 1);
-                        rect.setAttribute("fill", "var(--surface)");
-                        rect.setAttribute("stroke", "var(--secondary)");
-                        rect.setAttribute("stroke-width", "1.5");
-                        rect.setAttribute("class", "canvas-slice");
-                        rect.style.cursor = 'pointer';
-                        rect.style.transition = 'fill 0.3s';
-                        rect.onclick = function() {
-                            playSound('click');
-                            this.classList.toggle('active');
-                            if (this.classList.contains('active')) {
-                                this.setAttribute("fill", col);
-                            } else {
-                                this.setAttribute("fill", "var(--surface)");
-                            }
-                        };
-                        svg.appendChild(rect);
-                        count++;
-                    }
+                let cols = Math.ceil(Math.sqrt(d)), rows = Math.ceil(d/cols), w=2/cols, hght=2/rows, c=0;
+                for(let r=0; r<rows; r++) { 
+                    for(let col=0; col<cols; col++) { 
+                        if(c>=d)break; 
+                        h+=`<rect x="${-1+col*w}" y="${-1+r*hght}" width="${w}" height="${hght}" fill="var(--surface)" stroke="var(--border)" stroke-width="0.04" class="slice" onclick="fillSlice(this)"/>`; 
+                        c++; 
+                    } 
                 }
             }
-            figBox.appendChild(svg);
-            container.appendChild(figBox);
+            totalHtml += h + `</svg>`;
         }
+        document.getElementById('shape-container').innerHTML = totalHtml;
+    }
+    
+    function fillSlice(el) { 
+        playSound('click'); 
+        let c = document.getElementById('build-color').value; 
+        if(el.getAttribute('fill') === 'var(--surface)') { el.setAttribute('fill', c); el.dataset.c="1"; } 
+        else { el.setAttribute('fill', 'var(--surface)'); el.dataset.c="0"; }
     }
 
     // AJUSTE 2: Comprobación del taller guiado, sin revelación de respuestas
