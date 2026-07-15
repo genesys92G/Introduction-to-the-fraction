@@ -1,0 +1,1962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aventuras Fraccionarias en Colombia</title>
+    <style>
+        /* --- VARIABLES Y MODO OSCURO --- */
+        :root {
+            --primary: #FFC107; --primary-dark: #d39e00;
+            --secondary: #004B87; --secondary-dark: #00335c;
+            --accent: #E31837; --accent-dark: #b5122b;
+            --success: #28a745; --success-dark: #1e7e34;
+            --bg: #eef2f5; --surface: #ffffff;
+            --text: #2c3e50; --border: #ced4da;
+            --shadow-light: #ffffff; --shadow-dark: #d1d9e6;
+            --info-bg: #e9f5ff;
+            --highlight: #004B87;
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212; --surface: #1e1e1e; --text: #f8f9fa;
+            --border: #333333; --secondary: #64B5F6; --secondary-dark: #1976D2;
+            --shadow-light: #1a1a1a; --shadow-dark: #0a0a0a;
+            --info-bg: rgba(100, 181, 246, 0.15);
+            --primary: #FFD54F; --primary-dark: #FFA000;
+            --accent: #FF5252; --accent-dark: #D32F2F;
+            --highlight: #FFD54F;
+        }
+
+        * { box-sizing: border-box; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; line-height: 1.6; overflow-x: hidden; position: relative; }
+
+        /* --- ENCABEZADO Y NAVEGACIÓN --- */
+        header { background: var(--surface); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 20px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; border-bottom: 5px solid var(--primary); }
+        .logo-container { display: flex; align-items: center; gap: 15px; }
+        .logo-svg { width: 50px; height: 50px; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)); animation: float 3s ease-in-out infinite; }
+        header h1 { margin: 0; color: var(--secondary); font-size: 28px; }
+
+        .controls-pill { background: linear-gradient(145deg, #c3e6cb, #a8d5b5); border-radius: 50px; display: flex; padding: 8px 12px; gap: 10px; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1); }
+        [data-theme="dark"] .controls-pill { background: linear-gradient(145deg, #333, #222); }
+        .controls-pill button { background: var(--primary); border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 20px; cursor: pointer; box-shadow: 0 4px 0 var(--primary-dark); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .controls-pill button:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--primary-dark); }
+        .controls-pill button:hover { transform: scale(1.15) rotate(10deg); box-shadow: 0 8px 15px rgba(0,0,0,0.2); }
+
+        nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; padding: 30px 15px; }
+        nav button { background: linear-gradient(145deg, var(--surface), var(--bg)); color: var(--text); border: 2px solid var(--border); padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); position: relative; overflow: hidden; transition: all 0.3s ease; }
+        nav button.locked { opacity: 0.7; border-color: #999; }
+        nav button.active { background: var(--secondary); color: white; border-color: var(--secondary); box-shadow: inset 4px 4px 8px var(--secondary-dark); }
+        nav button:not(.locked):hover { transform: scale(1.05) translateY(-3px); box-shadow: 8px 12px 20px rgba(0,0,0,0.15); border-color: var(--primary); }
+
+        /* --- MEDIDOR DE PROGRESO FLOTANTE --- */
+        #progress-bubble {
+            position: absolute;
+            right: 30px;
+            top: 170px;
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: var(--surface);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            cursor: pointer;
+            transition: top 0.6s cubic-bezier(0.1, 0.8, 0.2, 1);
+            border: 3px solid var(--primary);
+        }
+        [data-theme="dark"] #progress-bubble {
+            background: #1e1e1e;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .progress-svg { transform: rotate(-90deg); }
+        .progress-text {
+            font-size: 14px;
+            font-weight: bold;
+            fill: var(--text);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            transform: rotate(90deg);
+            transform-origin: center;
+        }
+
+        /* --- DISEÑOS --- */
+        .tab-content { display: none; max-width: 95%; margin: 10px auto 40px auto; background: var(--surface); padding: 40px; border-radius: 25px; box-shadow: 10px 10px 30px var(--shadow-dark), -10px -10px 30px var(--shadow-light); animation: fadeIn 0.4s ease-in-out; }
+        .tab-content.active { display: block; }
+        
+        .masonry-layout { column-count: 2; column-gap: 30px; margin-bottom: 30px; }
+        .masonry-item { break-inside: avoid; margin-bottom: 30px; display: inline-block; width: 100%; }
+        
+        .grid-2col-equal { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: stretch; margin-bottom: 30px; }
+        .grid-2col-equal .activity-box { display: flex; flex-direction: column; justify-content: space-between; height: 100%; margin-bottom: 0; }
+        @media(max-width: 1000px) { .masonry-layout, .grid-2col-equal { column-count: 1; grid-template-columns: 1fr; } }
+
+        .split-layout { display: flex; gap: 30px; align-items: stretch; margin-bottom: 30px; }
+        .split-left { flex: 1; display: flex; flex-direction: column; gap: 20px; }
+        .split-right { flex: 1.2; display: flex; flex-direction: column; }
+        @media(max-width: 1000px) { .split-layout { flex-direction: column; } }
+
+        .info-box { background: linear-gradient(145deg, var(--info-bg), var(--surface)); border-left: 8px solid var(--highlight); padding: 25px; border-radius: 0 15px 15px 0; font-size: 18px; margin-bottom: 20px; }
+        .activity-box { background: linear-gradient(145deg, var(--surface), var(--bg)); border: 1px solid var(--border); padding: 30px; border-radius: 20px; box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light); transition: transform 0.3s ease; }
+        .activity-box:hover { transform: translateY(-3px); border-color: rgba(0, 75, 135, 0.2); }
+
+        /* --- ESTILO DE CONSEJOS --- */
+        .tip-card-a {
+            background: linear-gradient(145deg, rgba(255, 193, 7, 0.08), var(--surface));
+            border-left: 6px solid var(--primary);
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 17px;
+            box-shadow: 5px 5px 15px var(--shadow-dark), -5px -5px 15px var(--shadow-light);
+            border-top: 1px solid rgba(255,193,7,0.15);
+            border-right: 1px solid rgba(255,193,7,0.15);
+            border-bottom: 1px solid rgba(255,193,7,0.15);
+        }
+        .tip-card-b {
+            background: linear-gradient(145deg, rgba(0, 75, 135, 0.08), var(--surface));
+            border-left: 6px solid var(--secondary);
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 17px;
+            box-shadow: 5px 5px 15px var(--shadow-dark), -5px -5px 15px var(--shadow-light);
+            border-top: 1px solid rgba(0, 75, 135, 0.15);
+            border-right: 1px solid rgba(0, 75, 135, 0.15);
+            border-bottom: 1px solid rgba(0, 75, 135, 0.15);
+        }
+
+        /* --- BOTONES Y ANIMACIONES AL PASAR EL MOUSE --- */
+        .btn-3d { background: linear-gradient(135deg, var(--primary), #FF9800); color: #000; border: none; padding: 15px 25px; border-radius: 15px; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 6px 0 var(--primary-dark); display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; overflow: hidden; }
+        .btn-3d:active { transform: translateY(6px) scale(0.98); box-shadow: 0 0px 0 var(--primary-dark); }
+        .btn-check-3d { background: linear-gradient(135deg, var(--success), #218838); color: white; box-shadow: 0 6px 0 var(--success-dark); width: 100%; font-size: 20px; padding: 20px; margin-top: 20px; border-radius: 15px; border: none; cursor: pointer; font-weight: bold; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .btn-check-3d:active { box-shadow: 0 0px 0 var(--success-dark); transform: translateY(6px) scale(0.98); }
+        
+        .btn-3d:hover, .btn-check-3d:hover { transform: scale(1.03) translateY(-2px); filter: brightness(1.1); box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 6px 0 var(--primary-dark); z-index: 2; }
+        .btn-check-3d:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 6px 0 var(--success-dark); }
+
+        input[type="number"], select { padding: 12px; border: 2px solid var(--border); border-radius: 10px; font-size: 20px; text-align: center; font-weight: bold; width: 100px; background: var(--surface); color: var(--text); transition: all 0.3s; }
+        input[type="number"]:focus, select:focus { border-color: var(--secondary); outline: none; box-shadow: 0 0 10px rgba(0, 75, 135, 0.3); transform: scale(1.05); }
+        select { width: auto; }
+        
+        .feedback { display: block; margin-top: 15px; font-weight: bold; font-size: 18px; padding: 15px; border-radius: 10px; text-align: left; transition: all 0.3s; opacity: 0; transform: translateY(-10px); }
+        .feedback.show { opacity: 1; transform: translateY(0); }
+        .correct { background: rgba(40,167,69,0.1); color: var(--success); border-left: 5px solid var(--success); }
+        .incorrect { background: rgba(227,24,55,0.1); color: var(--accent); border-left: 5px solid var(--accent); }
+        
+        .code-reveal { background: #2c3e50; color: #FFD54F; padding: 20px; font-size: 24px; text-align: center; border-radius: 15px; letter-spacing: 5px; font-family: monospace; display: none; margin: 20px auto; font-weight: bold; width: fit-content; border: 2px solid #FFC107; box-shadow: 0 0 20px rgba(255, 213, 79, 0.5); }
+
+        /* --- ELEMENTOS DE LA INTERFAZ --- */
+        .emoji-icon { font-size: 60px; text-align: center; display: block; margin: 10px 0; user-select: none; }
+        
+        /* Cuadrícula de búsqueda de palabras */
+        .word-search { display: grid; grid-template-columns: repeat(12, 1fr); gap: 5px; margin: 20px auto; max-width: 500px; }
+        .ws-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: var(--surface); color: var(--text); border-radius: 8px; font-weight: bold; cursor: pointer; box-shadow: 2px 2px 5px var(--shadow-dark); font-size: 18px; user-select: none; transition: all 0.2s; border: 2px solid transparent; }
+        .ws-cell:hover { transform: scale(1.1); border-color: var(--primary); z-index: 2; }
+        .ws-cell.selected { background: var(--primary); color: #000; box-shadow: inset 2px 2px 5px var(--primary-dark); border-color: var(--primary-dark); transform: scale(0.95); }
+
+        /* Arrastrar y soltar cajas de palabras */
+        .word-bank { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 20px; min-height: 50px; padding: 15px; background: rgba(0,0,0,0.05); border-radius: 15px; border: 2px dashed var(--border); }
+        .word-btn { background: linear-gradient(135deg, var(--surface), var(--bg)); padding: 12px 25px; border-radius: 10px; cursor: grab; font-weight: bold; box-shadow: 4px 4px 8px var(--shadow-dark); border: 2px solid var(--secondary); display: inline-block; font-size: 16px; transition: all 0.2s; color: var(--text); }
+        .word-btn:active { cursor: grabbing; transform: scale(0.95); }
+        .word-btn:hover { transform: scale(1.08) translateY(-2px); box-shadow: 0 8px 15px rgba(0, 75, 135, 0.3); background: var(--secondary); color: white; }
+
+        .frac-structure { display: flex; flex-direction: column; align-items: center; gap: 20px; background: var(--info-bg); padding: 30px; border-radius: 15px; border: 2px solid var(--secondary); box-shadow: inset 0 5px 15px rgba(0,0,0,0.05); }
+        .frac-row { display: flex; align-items: center; gap: 20px; width: 100%; justify-content: center; }
+        
+        .big-number-input { width: 120px !important; height: 80px; font-size: 35px !important; text-align: center; border: 4px solid var(--secondary); border-radius: 15px; background: var(--surface); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .frac-slot { width: 180px; height: 60px; border: 3px dashed var(--border); border-radius: 10px; background: var(--surface); color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; font-size: 18px; font-weight: bold; overflow: hidden; }
+        .frac-slot:hover { border-color: var(--primary); background: rgba(255, 193, 7, 0.1); transform: scale(1.05); }
+        .frac-slot.filled { border-style: solid; border-color: var(--success); background: rgba(40,167,69,0.1); color: var(--success-dark); }
+        
+        .slice { cursor: pointer; transition: opacity 0.2s; }
+        .slice:hover { opacity: 0.7; }
+
+        /* Conectar con hilos */
+        .connect-game { position: relative; display: flex; justify-content: space-between; margin: 30px 0; padding: 20px; background: var(--bg); border-radius: 15px; border: 2px dashed var(--border); }
+        .cg-col { display: flex; flex-direction: column; gap: 30px; z-index: 2; width: 40%; }
+        .cg-node { background: var(--surface); color: var(--text); border: 3px solid var(--secondary); padding: 15px; text-align: center; border-radius: 15px; font-weight: bold; font-size: 18px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 8px var(--shadow-dark); }
+        .cg-node:hover { transform: scale(1.05); border-color: var(--primary); }
+        .cg-node.active { background: var(--primary); color: #000; border-color: var(--primary-dark); transform: scale(1.1); box-shadow: 0 0 15px var(--primary); }
+        .cg-node.matched { background: var(--success); color: white; border-color: var(--success-dark); cursor: default; }
+        .lines-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+
+        /* Alternancia Verdadero/Falso */
+        .tf-toggle { display: flex; gap: 15px; justify-content: center; margin: 20px 0; }
+        .tf-btn { flex: 1; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 15px; border: 3px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; transition: all 0.3s; }
+        .tf-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--shadow-dark); }
+        .tf-btn.true.selected { background: var(--success); color: white; border-color: var(--success-dark); transform: scale(1.05); }
+        .tf-btn.false.selected { background: var(--accent); color: white; border-color: var(--accent-dark); transform: scale(1.05); }
+
+        /* Lista ordenable */
+        .sortable-list { list-style: none; padding: 0; margin: 20px 0; }
+        .sortable-list li { display: flex; align-items: center; justify-content: space-between; background: var(--surface); margin-bottom: 15px; padding: 15px 25px; border-radius: 12px; border: 2px solid var(--secondary); font-size: 18px; font-weight: bold; box-shadow: 0 4px 8px var(--shadow-dark); transition: transform 0.3s; }
+        .sortable-list li:hover { transform: translateX(10px); border-color: var(--primary); }
+        .sort-controls button { background: var(--info-bg); border: 2px solid var(--secondary); border-radius: 8px; padding: 5px 15px; font-size: 18px; cursor: pointer; margin-left: 5px; transition: all 0.2s; color: var(--text); }
+        .sort-controls button:hover { background: var(--primary); border-color: var(--primary-dark); transform: scale(1.1); }
+
+        /* Resumen y modal */
+        .summary-card { background: var(--surface); border-radius: 15px; padding: 20px; text-align: center; box-shadow: 0 5px 15px var(--shadow-dark); border-bottom: 5px solid var(--secondary); display: flex; flex-direction: column; align-items: center; gap: 10px;}
+        #pie-chart { width: 200px; height: 200px; border-radius: 50%; background: conic-gradient(#ccc 0% 100%); box-shadow: 0 10px 20px rgba(0,0,0,0.3); border: 8px solid var(--surface); display: none; margin: 0 auto; transition: all 1s ease-out; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(8px); }
+        .modal-content { background: var(--surface); padding: 50px; border-radius: 30px; text-align: center; position: relative; max-width: 600px; width: 90%; box-shadow: 0 25px 60px rgba(0,0,0,0.6); animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 6px solid var(--success); }
+        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 35px; cursor: pointer; color: var(--text); background: none; border: none; font-weight: bold; transition: transform 0.3s; }
+        .modal-close:hover { transform: rotate(90deg) scale(1.2); color: var(--accent); }
+        
+        /* --- ANIMACIONES --- */
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { 0% { transform: scale(0.4) translateY(50px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        @keyframes wiggle { 0% { transform: rotate(0deg); } 25% { transform: rotate(8deg); } 50% { transform: rotate(0deg); } 75% { transform: rotate(-8deg); } 100% { transform: rotate(0deg); } }
+        @keyframes pulsePizza { 0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(255,193,7,0)); } 50% { transform: scale(1.05); filter: drop-shadow(0 15px 25px rgba(255,193,7,0.4)); } 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(255,193,7,0)); } }
+        
+        .anim-bounce { animation: bounce 2s infinite; }
+        .anim-wiggle { animation: wiggle 2.5s infinite; }
+        .anim-float { animation: float 3.5s ease-in-out infinite; }
+        
+        /* Clases visuales personalizadas */
+        .riddle-slice { transition: fill 0.3s; }
+        .riddle-slice:hover { opacity: 0.8; filter: brightness(1.1); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-container">
+        <svg class="logo-svg" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="#FFC107" />
+            <path d="M50 5 L50 95" stroke="#004B87" stroke-width="8" />
+            <path d="M5 50 L95 50" stroke="#E31837" stroke-width="8" />
+            <circle cx="50" cy="50" r="15" fill="#ffffff" />
+            <text x="50" y="56" font-size="18" font-family="Arial" font-weight="bold" fill="#004B87" text-anchor="middle">3/4</text>
+        </svg>
+        <h1><span class="tx" data-es="🇨🇴 Aventuras Fraccionarias en Colombia" data-en="🇨🇴 Fractional Adventures in Colombia">🇨🇴 Aventuras Fraccionarias en Colombia</span></h1>
+    </div>
+    <div class="controls-pill">
+        <button id="lang-btn" onclick="toggleLang()" title="Traducir">🌐</button>
+        <button id="sound-btn" onclick="toggleSound()" title="Sonido">🔊</button>
+        <button id="theme-btn" onclick="toggleTheme()" title="Contraste">🌙</button>
+    </div>
+</header>
+
+<!-- INDICADOR DE PORCENTAJE FLOTANTE -->
+<div id="progress-bubble" title="Progreso de la página">
+    <svg class="progress-svg" width="66" height="66" viewBox="0 0 66 66">
+        <circle cx="33" cy="33" r="28" stroke="var(--border)" stroke-width="5" fill="none" opacity="0.3" />
+        <circle id="progress-bar-fill" cx="33" cy="33" r="28" stroke="var(--secondary)" stroke-width="5" fill="none" 
+                stroke-dasharray="176" stroke-dashoffset="176" stroke-linecap="round" />
+        <text class="progress-text" x="33" y="38" text-anchor="middle">0%</text>
+    </svg>
+</div>
+
+<nav>
+    <button class="tab-link active" onclick="openTab(event, 'tab1')">👋 <span class="tx" data-es="Presentación" data-en="Presentation">Presentación</span></button>
+    <button class="tab-link locked" onclick="openTab(event, 'tab2')" id="btn-tab2">🔒 <span class="tx" data-es="El Taller del Creador" data-en="Creator's Workshop">El Taller del Creador</span></button>
+    <button class="tab-link locked" onclick="openTab(event, 'tab3')" id="btn-tab3">🔒 <span class="tx" data-es="Fauna Colombiana" data-en="Colombian Fauna">Fauna Colombiana</span></button>
+    <button class="tab-link locked" onclick="openTab(event, 'tab4')" id="btn-tab4">🔒 <span class="tx" data-es="Cocina de Arepas" data-en="Arepas Kitchen">Cocina de Arepas</span></button>
+    <button class="tab-link locked" onclick="openTab(event, 'tab5')" id="btn-tab5">🔒 <span class="tx" data-es="Los Escarabajos" data-en="The Cyclists">Los Escarabajos</span></button>
+    <button class="tab-link locked" onclick="openTab(event, 'tab6')" id="btn-tab6">🔒 <span class="tx" data-es="Evaluación" data-en="Conclusions">Conclusiones</span></button>
+</nav>
+
+<!-- MODAL DE VICTORIA -->
+<div class="modal-overlay" id="victory-modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeVictory()">×</button>
+        <div style="font-size: 80px; margin-bottom: 15px;" class="anim-bounce">🎉</div>
+        <h2 style="color: var(--success); font-size: 36px; margin: 10px 0;" id="victory-title">¡Excelente trabajo!</h2>
+        <p id="victory-msg" style="font-size: 22px; font-weight: bold;">Has completado el desafío con éxito.</p>
+    </div>
+</div>
+
+<!-- PESTAÑA 1: Presentación -->
+<div id="tab1" class="tab-content active">
+    <div class="split-layout">
+        <div class="split-left">
+            <h2><span class="tx" data-es="¡Bienvenidos a nuestra clase interactiva! 🚀" data-en="Welcome to our interactive class! 🚀">¡Bienvenidos a nuestra clase interactiva! 🚀</span></h2>
+            <p><span class="tx" data-es="¡Hola! Soy el Profesor David. Exploremos juntos las fracciones con divertidos retos con sabor colombiano. ¡Completa las actividades de cada pestaña para conseguir el código secreto y desbloquear la siguiente!" data-en="Hi! I'm Teacher David. Let's explore fractions together through fun challenges with Colombian flavor. Complete the activities of each tab to get the secret code and unlock the next one!">¡Hola! Soy el Profesor David. Exploremos juntos las fracciones con divertidos retos con sabor colombiano. ¡Completa las actividades de cada pestaña para conseguir el código secreto y desbloquear la siguiente!</span></p>
+            <p><strong><span class="tx" data-es="Regla de oro:" data-en="Golden Rule:">Regla de oro:</span></strong> <span class="tx" data-es="Cada pestaña está bloqueada. Para obtener el código, debes completar las actividades de la pestaña anterior." data-en="Each tab is locked. To get the code, you must complete the activities from the previous tab.">Cada pestaña está bloqueada. Para obtener el código, debes completar las actividades de la pestaña anterior.</span></p>
+        </div>
+        <div class="split-right" style="justify-content: center; align-items: center;">
+            <svg viewBox="0 0 300 200" width="100%" height="250" style="animation: pulsePizza 4s infinite;">
+                <g transform="translate(200, 30)">
+                    <path d="M 20 150 L 10 30 L 70 30 L 60 150 Z" fill="#E31837" stroke="#b5122b" stroke-width="3" />
+                    <path d="M 5 30 L 75 30 L 70 20 L 10 20 Z" fill="#ffffff" stroke="#ced4da" stroke-width="2" />
+                    <path d="M 40 20 L 50 -15" stroke="#004B87" stroke-width="6" stroke-linecap="round" fill="none" />
+                    <rect x="25" y="70" width="30" height="40" fill="#ffffff" opacity="0.8" rx="5" />
+                    <text x="30" y="95" fill="#E31837" font-weight="bold" font-family="Arial" font-size="16">CO</text>
+                </g>
+                <g transform="translate(80, 100)">
+                    <g transform="translate(-15, -15)">
+                        <path d="M 0 0 L 0 -70 A 70 70 0 0 0 -70 0 Z" fill="#FFC107" stroke="#d39e00" stroke-width="2"/>
+                        <path d="M -5 -70 A 75 75 0 0 0 -75 -5 L -85 -5 A 85 85 0 0 1 -5 -85 Z" fill="#e67e22"/>
+                        <circle cx="-30" cy="-30" r="8" fill="#c0392b"/><circle cx="-50" cy="-15" r="6" fill="#c0392b"/><circle cx="-15" cy="-50" r="7" fill="#c0392b"/>
+                    </g>
+                    <g transform="translate(15, -15)">
+                        <path d="M 0 0 L 70 0 A 70 70 0 0 0 0 -70 Z" fill="#FFC107" stroke="#d39e00" stroke-width="2"/>
+                        <path d="M 75 -5 A 75 75 0 0 0 5 -75 L 5 -85 A 85 85 0 0 1 85 -5 Z" fill="#e67e22"/>
+                        <circle cx="30" cy="-30" r="7" fill="#c0392b"/><circle cx="50" cy="-15" r="8" fill="#c0392b"/><circle cx="15" cy="-50" r="6" fill="#c0392b"/>
+                    </g>
+                    <g transform="translate(-15, 15)">
+                        <path d="M 0 0 L -70 0 A 70 70 0 0 0 0 70 Z" fill="#FFC107" stroke="#d39e00" stroke-width="2"/>
+                        <path d="M -75 5 A 75 75 0 0 0 -5 75 L -5 85 A 85 85 0 0 1 -85 5 Z" fill="#e67e22"/>
+                        <circle cx="-30" cy="30" r="8" fill="#c0392b"/><circle cx="-50" cy="15" r="6" fill="#c0392b"/><circle cx="-15" cy="50" r="7" fill="#c0392b"/>
+                    </g>
+                    <g transform="translate(15, 15)">
+                        <path d="M 0 0 L 0 70 A 70 70 0 0 0 70 0 Z" fill="#FFD54F" stroke="#d39e00" stroke-width="2"/>
+                        <path d="M 5 75 A 75 75 0 0 0 75 5 L 85 5 A 85 85 0 0 1 5 85 Z" fill="#e67e22"/>
+                        <circle cx="30" cy="30" r="7" fill="#c0392b"/><circle cx="50" cy="15" r="8" fill="#c0392b"/><circle cx="15" cy="50" r="6" fill="#c0392b"/>
+                    </g>
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <div class="grid-2col-equal">
+        <div class="activity-box">
+            <h3><span class="tx" data-es="Actividad 1: Sopa de Letras Bilingüe 🔍" data-en="Activity 1: Bilingual Math Word Search 🔍">Actividad 1: Sopa de Letras Bilingüe 🔍</span></h3>
+            <p><span class="tx" data-es="Encuentra las palabras clave:" data-en="Find the key words:">Encuentra las palabras clave:</span> <strong>FRACTION, WHOLE, NUMERATOR, DENOMINATOR, BAR, EQUAL, SET, SECTION, SQUARE, CIRCLE, PARTS</strong>.</p>
+            <div class="word-search" id="word-search"></div>
+            <p style="font-size: 14px; text-align: center; margin-top: 10px;">
+                <strong><span class="tx" data-es="Palabras en este reto:" data-en="Words in this challenge:">Palabras en este reto:</span></strong> <span style="color:var(--secondary); font-weight:bold;">FRACTION, WHOLE, NUMERATOR, DENOMINATOR, BAR, EQUAL, SET, SECTION, SQUARE, CIRCLE, PARTS</span>
+            </p>
+            <button class="btn-3d" style="width:100%; background: var(--success); color: white;" onclick="checkWordSearch()">✅ <span class="tx" data-es="Revisar Sopa" data-en="Check Word Search">Revisar Sopa</span></button>
+            <span id="ws-feedback" class="feedback"></span>
+        </div>
+
+        <div class="activity-box" style="border: 2px solid var(--primary);">
+            <h3 style="color: var(--highlight);">🔑 <span class="tx" data-es="Actividad 2: El Acertijo del Guardián" data-en="Activity 2: The Guardian's Riddle">Actividad 2: El Acertijo del Guardián</span></h3>
+            
+            <!-- INTERACTIVE RIDDLE PICTURES (Requested Adjustment 1) -->
+            <div id="riddle-visual-container" style="display: flex; justify-content: center; align-items: center; margin-bottom: 15px; min-height: 140px; background: rgba(0,0,0,0.03); border-radius: 15px; border: 2px dashed var(--border); padding: 10px;"></div>
+            
+            <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+                <p id="logic-question" style="font-size: 19px; font-style: italic; min-height: 110px; text-align: left; border-left: 5px solid var(--primary); padding-left: 15px; line-height: 1.5;"></p>
+                <div style="display: flex; align-items: center; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
+                    <div style="text-align: center;">
+                        <label style="font-weight: bold;" class="tx" data-es="Num:" data-en="Num:">Num:</label><br>
+                        <input type="number" id="logic-num" placeholder="?">
+                    </div>
+                    <span style="font-size: 40px; font-weight: bold; color: var(--secondary);">/</span>
+                    <div style="text-align: center;">
+                        <label style="font-weight: bold;" class="tx" data-es="Den:" data-en="Den:">Den:</label><br>
+                        <input type="number" id="logic-den" placeholder="?">
+                    </div>
+                </div>
+            </div>
+            <button class="btn-3d" style="background: var(--success); color: white; width: 100%;" onclick="checkLogicPuzzle()">✅ <span class="tx" data-es="Revisar Acertijo" data-en="Check Riddle">Revisar Acertijo</span></button>
+            <span id="logic-feedback" class="feedback"></span>
+            <div id="code-tab1" class="code-reveal"><span class="tx" data-es="Código Desbloqueado:" data-en="Unlocked Code:">Código Desbloqueado:</span> 1234</div>
+            
+            <!-- PESTAÑA 1 INFO/TIP -->
+            <div class="tip-card-a">
+                <span class="tx" data-es="💡 <strong>Tip de Aventurero:</strong> ¿Sabías que la palabra 'fracción' proviene del latín <em>fractio</em> que significa 'romper o quebrar'? ¡Estamos dividiendo un entero en partes exactamente iguales!" data-en="💡 <strong>Adventurer's Tip:</strong> Did you know that the word 'fraction' comes from the Latin <em>fractio</em> which means 'to break'? We are dividing a whole into exactly equal parts!">💡 <strong>Tip de Aventurero:</strong> ¿Sabías que la palabra 'fracción' proviene del latín <em>fractio</em> que significa 'romper o quebrar'? ¡Estamos dividiendo un entero en partes exactamente iguales!</span>
+            </div>
+
+            <div class="info-box" style="margin-top: 30px;">
+                <strong>💡 <span class="tx" data-es="Reflexión de inicio:" data-en="Starting Reflection:">Reflexión de inicio:</span></strong> 
+                <span class="tx" data-es="¿Están listos para descubrir cómo las matemáticas moldean el mundo que nos rodea? Resuelvan los acertijos para avanzar." data-en="Are you ready to discover how math shapes the world around us? Solve the puzzles to advance.">¿Están listos para descubrir cómo las matemáticas moldean el mundo que nos rodea? Resuelvan los acertijos para avanzar.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PESTAÑA 2: El Taller del Creador -->
+<div id="tab2" class="tab-content">
+    <div class="info-box">
+        <strong>⚡ <span class="tx" data-es="El Taller del Arquitecto Numérico" data-en="The Numerical Architect's Workshop">El Taller del Arquitecto Numérico</span></strong><br>
+        <span class="tx" data-es="En este taller aprenderemos a construir fracciones paso a paso. Primero generaremos un plano, y luego estructuraremos la fracción seleccionando sus partes y pintando la cantidad correcta. ¡Puedes generar hasta 5 figuras!" data-en="In this workshop we will learn to build fractions step by step. First we will generate a blueprint, and then structure the fraction by selecting its parts and painting the correct amount. You can generate up to 5 figures!">En este taller aprenderemos a construir fracciones paso a paso. Primero generaremos un plano, y luego estructuraremos la fracción seleccionando sus partes y pintando la cantidad correcta. ¡Puedes generar hasta 5 figuras!</span>
+    </div>
+
+    <div class="grid-2col-equal" style="align-items: stretch; margin-bottom: 30px;">
+        <div class="activity-box" style="display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 0;">
+            <h3><span class="tx" data-es="Paso 1: Situación de la Vida Real 🇨🇴" data-en="Step 1: Real-Life Situation 🇨🇴">Paso 1: Situación de la Vida Real 🇨🇴</span></h3>
+            <div id="challenge-text" style="font-size: 18px; line-height: 1.6; background: var(--bg); padding: 25px; border-radius: 15px; border-left: 5px solid var(--secondary); flex-grow: 1; margin: 15px 0; display: flex; flex-direction: column; justify-content: center;">
+                <p style="text-align: center; font-style: italic; margin: 0;" class="tx" data-es="Haz clic en el botón de abajo para generar tu primera situación matemática con sabor colombiano." data-en="Click on the button below to generate your first mathematical situation with Colombian flavor.">Haz clic en el botón de abajo para generar tu primera situación matemática con sabor colombiano.</p>
+            </div>
+            <button class="btn-3d" style="width:100%; background: var(--secondary); color: white;" onclick="newActivity()">🎲 <span class="tx" data-es="Nueva Situación" data-en="New Situation">Nueva Situación</span></button>
+        </div>
+
+        <div class="activity-box" style="display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 0;">
+            <h3><span class="tx" data-es="Paso 2: Estructura Numérica 🔢" data-en="Step 2: Numerical Structure 🔢">Paso 2: Estructura Numérica 🔢</span></h3>
+            
+            <div class="frac-structure" style="padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                <p style="margin:0; font-weight:bold; text-align: center; font-size: 15px;"><span class="tx" data-es="Haz clic o arrastra las etiquetas para asignarlas a la estructura e ingresa los números:" data-en="Click or drag the labels to assign them to the structure and enter the numbers:">Haz clic o arrastra las etiquetas para asignarlas a la estructura e ingresa los números:</span></p>
+                
+                <div class="word-bank" id="frac-words" style="margin: 10px 0;">
+                    <div class="word-btn" id="wb-num" draggable="true" ondragstart="dragWord(event)" onclick="assignWord(this, 'num')" data-type="num"><span class="tx" data-es="Numerador" data-en="Numerator">Numerador</span></div>
+                    <div class="word-btn" id="wb-bar" draggable="true" ondragstart="dragWord(event)" onclick="assignWord(this, 'bar')" data-type="bar"><span class="tx" data-es="Barra" data-en="Bar">Barra</span></div>
+                    <div class="word-btn" id="wb-den" draggable="true" ondragstart="dragWord(event)" onclick="assignWord(this, 'den')" data-type="den"><span class="tx" data-es="Denominador" data-en="Denominator">Denominador</span></div>
+                </div>
+                
+                <div class="frac-row" style="flex-direction: row; gap: 40px;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                        <input type="number" id="struct-num" class="big-number-input" placeholder="0">
+                        <hr style="width: 130px; border: none; border-top: 6px solid var(--secondary); margin: 0; border-radius: 3px;">
+                        <input type="number" id="struct-den" class="big-number-input" placeholder="0">
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                        <div class="frac-slot" data-target="num" ondragover="allowDrop(event)" ondrop="dropWord(event)" onclick="returnWord(this, 'wb-num')"><span style="opacity:0.6" class="tx" data-es="Arrastra aquí" data-en="Drag here">Arrastra aquí</span></div>
+                        <div class="frac-slot" data-target="bar" ondragover="allowDrop(event)" ondrop="dropWord(event)" onclick="returnWord(this, 'wb-bar')" style="height: 25px; min-height: 25px;"><span style="opacity:0.6" class="tx" data-es="Arrastra aquí" data-en="Drag here">Arrastra aquí</span></div>
+                        <div class="frac-slot" data-target="den" ondragover="allowDrop(event)" ondrop="dropWord(event)" onclick="returnWord(this, 'wb-den')"><span style="opacity:0.6" class="tx" data-es="Arrastra aquí" data-en="Drag here">Arrastra aquí</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="activity-box" style="margin-top: 30px; width: 100%;">
+        <h3><span class="tx" data-es="Paso 3: Configuración y Lienzo Interactivo 🎨" data-en="Step 3: Configuration and Interactive Canvas 🎨">Paso 3: Configuración y Lienzo Interactivo 🎨</span></h3>
+        <p style="margin-top:0; font-style: italic; font-size: 18px;"><span class="tx" data-es="Ajusta los controles de abajo para que coincidan con la situación del Paso 1, genera el lienzo y luego pinta haciendo clic en las piezas." data-en="Adjust the controls below to match the situation from Step 1, generate the canvas, and then paint by clicking on the pieces.">Ajusta los controles de abajo para que coincidan con la situación del Paso 1, genera el lienzo y luego pinta haciendo clic en las piezas.</span></p>
+        
+        <div style="margin-bottom: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; align-items: end; background: var(--surface); padding: 20px; border-radius: 15px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border);">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label><strong>1. <span class="tx" data-es="Forma de la Base:" data-en="Base Shape:">Forma de la Base:</span></strong></label>
+                <select id="build-shape" style="width:100%"><option value="circular" class="tx" data-es="Circular" data-en="Circular">Circular</option><option value="cuadrada" class="tx" data-es="Cuadrada" data-en="Square">Cuadrada</option></select>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label><strong>2. <span class="tx" data-es="Cantidad de Figuras:" data-en="Number of Figures:">Cantidad de Figuras:</span></strong></label>
+                <input type="number" id="build-qty" min="1" max="5" value="1" style="width:100%">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label><strong>3. <span class="tx" data-es="Divisiones por Figura:" data-en="Divisions per Figure:">Divisiones por Figura:</span></strong></label>
+                <input type="number" id="build-den" min="1" max="16" value="1" style="width:100%">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label><strong>4. <span class="tx" data-es="Color de la Pintura:" data-en="Paint Color:">Color de la Pintura:</span></strong></label>
+                <input type="color" id="build-color" value="#E31837" style="height: 48px; width: 100%; cursor: pointer; border-radius: 10px; border: 2px solid var(--border); background: var(--surface); padding: 2px;">
+            </div>
+        </div>
+
+        <button class="btn-3d" style="background: var(--primary); color: #000; width: 100%; margin-bottom: 20px; font-size: 20px;" onclick="generateShape()">⚙️ <span class="tx" data-es="Generar Lienzo Interactivo" data-en="Generate Interactive Canvas">Generar Lienzo Interactivo</span></button>
+        
+        <div id="shape-container" style="min-height: 400px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 30px; background: var(--bg); border-radius: 15px; padding: 40px; border: 3px dashed var(--secondary); box-shadow: inset 0 5px 15px rgba(0,0,0,0.1);">
+            <p style="opacity: 0.6; font-size: 20px; font-weight: bold;" class="tx" data-es="El lienzo está vacío. Selecciona tus opciones arriba y genera el lienzo." data-en="The canvas is empty. Select your options above and generate the canvas.">El lienzo está vacío. Selecciona tus opciones arriba y genera el lienzo.</p>
+        </div>
+        
+        <button class="btn-check-3d" onclick="checkBuilder()">✅ <span class="tx" data-es="Revisar Construcción Completa" data-en="Check Full Construction">Revisar Construcción Completa</span></button>
+        <span id="builder-feedback" class="feedback"></span>
+    </div>
+
+    <!-- PESTAÑA 2 INFO/TIP -->
+    <div class="tip-card-b">
+        <span class="tx" data-es="⚡ <strong>Dato del Constructor:</strong> El denominador <em>jamás</em> puede ser cero. ¿Por qué? ¡Porque no puedes dividir un objeto real en cero partes! Físicamente no tendría ningún sentido." data-en="⚡ <strong>Builder's Fact:</strong> The denominator can <em>never</em> be zero. Why? Because you can't divide a real object into zero parts! Physically, it wouldn't make any sense.">⚡ <strong>Dato del Constructor:</strong> El denominador <em>jamás</em> puede ser cero. ¿Por qué? ¡Porque no puedes dividir un objeto real en cero partes! Físicamente no tendría ningún sentido.</span>
+    </div>
+    
+    <div style="text-align: center; margin-top: 30px;">
+        <button id="btn-finish-tab2" class="btn-3d" style="display:none; background: #6f42c1; color:white; font-size: 24px; padding: 20px 50px;" onclick="revealCode('code-tab2')">🎁 <span class="tx" data-es="Generar Código Secreto" data-en="Generate Secret Code">Generar Código Secreto</span></button>
+        <div id="code-tab2" class="code-reveal">5678</div>
+    </div>
+</div>
+
+<!-- PESTAÑA 3: Fauna Colombiana -->
+<div id="tab3" class="tab-content">
+    <div class="info-box">
+        <strong>🐆 <span class="tx" data-es="Expedición a la Biodiversidad de Colombia" data-en="Biodiversity Expedition in Colombia">Expedición a la Biodiversidad de Colombia</span></strong><br>
+        <span class="tx" data-es="Acompáñanos en este recorrido por las selvas y montañas de Colombia. Resuelve problemas conectando con hilos, seleccionando verdadero/falso y ordenando los pasos." data-en="Join us on this journey through the jungles and mountains of Colombia. Solve problems by connecting with threads, selecting true/false and ordering the steps.">Acompáñanos en este recorrido por las selvas y montañas de Colombia. Resuelve problemas conectando con hilos, seleccionando verdadero/falso y ordenando los pasos.</span>
+    </div>
+    
+    <div class="masonry-layout">
+        <div class="masonry-item activity-box" id="t3-a1">
+            <h3>1. <span class="tx" data-es="El Rescate del Jaguar (Conectar pares)" data-en="The Jaguar Rescue (Connect pairs)">El Rescate del Jaguar (Conectar pares)</span></h3>
+            <span class="emoji-icon anim-wiggle">🐆</span>
+            <p><span class="tx" data-es="Haz clic en un término de la izquierda y luego en su definición correspondiente a la derecha para conectarlos con un hilo." data-en="Click on a term on the left and then on its corresponding definition on the right to connect them with a thread.">Haz clic en un término de la izquierda y luego en su definición correspondiente a la derecha para conectarlos con un hilo.</span></p>
+            
+            <div class="connect-game" id="cg-tab3">
+                <svg id="cg-lines" class="lines-overlay"></svg>
+                <div class="cg-col" id="cg-left">
+                    <button class="cg-node" onclick="selectNode(this)" data-id="3/8">3/8</button>
+                    <button class="cg-node" onclick="selectNode(this)" data-id="8/5">8/5</button>
+                </div>
+                <div class="cg-col" id="cg-right">
+                    <button class="cg-node" onclick="selectNode(this)" data-match="8/5"><span class="tx" data-es="Fracción Impropia" data-en="Improper Fraction">Fracción Impropia</span></button>
+                    <button class="cg-node" onclick="selectNode(this)" data-match="3/8"><span class="tx" data-es="Fracción Propia" data-en="Proper Fraction">Fracción Propia</span></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="masonry-item activity-box" id="t3-a2">
+            <h3>2. <span class="tx" data-es="Las Ranas Saltarinas del Chocó" data-en="Jumping Frogs of Chocó">Las Ranas Saltarinas del Chocó</span></h3>
+            <span class="emoji-icon anim-bounce">🐸</span>
+            <p><span class="tx" data-es="Un biólogo tenía que estudiar 5 ranas, pero logró estudiar 7 ranas doradas (7/5). ¿La fracción 7/5 es Menor a un entero (Propia)?" data-en="A biologist had to study 5 frogs, but managed to study 7 golden frogs (7/5). Is the fraction 7/5 Less than a whole (Proper)?">Un biólogo tenía que estudiar 5 ranas, pero logró estudiar 7 ranas doradas (7/5). ¿La fracción 7/5 es Menor a un entero (Propia)?</span></p>
+            
+            <div class="tf-toggle" id="t3-tf2">
+                <button class="tf-btn true" onclick="setTF(this, true, 't3-tf2')">✅ <span class="tx" data-es="Verdadero" data-en="True">Verdadero</span></button>
+                <button class="tf-btn false" onclick="setTF(this, false, 't3-tf2')">❌ <span class="tx" data-es="Falso" data-en="False">Falso</span></button>
+            </div>
+            <input type="hidden" id="ans-t3-a2" value="">
+        </div>
+        
+        <div class="masonry-item activity-box" id="t3-a3">
+            <h3>3. <span class="tx" data-es="El Vuelo de las Guacamayas (Ordenar pasos)" data-en="Macaw Flight (Order steps)">El Vuelo de las Guacamayas (Ordenar pasos)</span></h3>
+            <span class="emoji-icon anim-float">🦜</span>
+            <p><span class="tx" data-es="Observas una bandada. Ordena los pasos lógicos para escribir la fracción de guacamayas rojas usando las flechas:" data-en="You observe a flock. Order the logical steps to write the fraction of red macaws using the arrows:">Observas una bandada. Ordena los pasos lógicos para escribir la fracción de guacamayas rojas usando las flechas:</span></p>
+            
+            <ul id="sort-list-1" class="sortable-list">
+                <li data-val="3"><span><span class="tx" data-es="A. Escribir el Numerador (Las rojas)" data-en="A. Write the Numerator (The red ones)">A. Escribir el Numerador (Las rojas)</span></span> <div class="sort-controls"><button onclick="moveUp(this)">⬆</button><button onclick="moveDown(this)">⬇</button></div></li>
+                <li data-val="1"><span><span class="tx" data-es="B. Identificar el grupo completo" data-en="B. Identify the whole group">B. Identificar el grupo completo</span></span> <div class="sort-controls"><button onclick="moveUp(this)">⬆</button><button onclick="moveDown(this)">⬇</button></div></li>
+                <li data-val="2"><span><span class="tx" data-es="C. Contar el Total (Denominador)" data-en="C. Count the Total (Denominator)">C. Contar el Total (Denominador)</span></span> <div class="sort-controls"><button onclick="moveUp(this)">⬆</button><button onclick="moveDown(this)">⬇</button></div></li>
+            </ul>
+        </div>
+
+        <div class="masonry-item activity-box" id="t3-a4">
+            <h3>4. <span class="tx" data-es="El Banquete del Oso de Anteojos" data-en="Spectacled Bear Banquet">El Banquete del Oso de Anteojos</span></h3>
+            <span class="emoji-icon anim-wiggle">🐻</span>
+            <p><span class="tx" data-es="El oso se comió las 4 partes de una tina de frutas dividida en 4 (4/4). Matemáticamente, ¿A qué equivale esto?" data-en="The bear ate the 4 parts of a fruit tub divided into 4 (4/4). Mathematically, what does this equal?">El oso se comió las 4 partes de una tina de frutas dividida en 4 (4/4). Matemáticamente, ¿A qué equivale esto?</span></p>
+            <div class="tf-toggle" id="t3-tf4">
+                <button class="tf-btn true" onclick="setTF(this, true, 't3-tf4')">✅ <span class="tx" data-es="A un entero (1)" data-en="One whole (1)">A un entero (1)</span></button>
+                <button class="tf-btn false" onclick="setTF(this, false, 't3-tf4')">❌ <span class="tx" data-es="A cero (0)" data-en="Zero (0)">A cero (0)</span></button>
+            </div>
+            <input type="hidden" id="ans-t3-a4" value="">
+        </div>
+
+        <div class="masonry-item activity-box" id="t3-a5">
+            <h3>5. <span class="tx" data-es="Avistamiento en el Páramo" data-en="Sightings in the Páramo">Avistamiento en el Páramo</span></h3>
+            <span class="emoji-icon anim-float">🦅</span>
+            <p><span class="tx" data-es="Avistaron 15 aves en total. De esas, 6 eran Cóndores. ¿Cómo se escribe la fracción de Cóndores vistos respecto al total?" data-en="They spotted 15 birds in total. Of those, 6 were Condors. How do you write the fraction of Condors seen?">Avistaron 15 aves en total. De esas, 6 eran Cóndores. ¿Cómo se escribe la fracción de Cóndores vistos respecto al total?</span></p>
+            <div style="background: var(--surface); padding: 20px; border-radius: 15px; text-align: center; border: 2px solid var(--border);">
+                <label><strong style="color:var(--accent); font-size: 20px;" class="tx" data-es="Numerador:" data-en="Numerator:">Numerador:</strong> <span id="val-t3-n5">1</span></label><br>
+                <input type="range" id="t3-n5" min="1" max="20" value="1" style="width: 100%; cursor: pointer;" oninput="document.getElementById('val-t3-n5').innerText=this.value">
+                <hr style="border: 2px solid var(--secondary); margin: 15px 0;">
+                <label><strong style="color:var(--secondary); font-size: 20px;" class="tx" data-es="Denominador:" data-en="Denominator:">Denominador:</strong> <span id="val-t3-d5">1</span></label><br>
+                <input type="range" id="t3-d5" min="1" max="20" value="1" style="width: 100%; cursor: pointer;" oninput="document.getElementById('val-t3-d5').innerText=this.value">
+            </div>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 3 INFO/TIP -->
+    <div class="tip-card-a">
+        <span class="tx" data-es="🐆 <strong>Consejo Salvaje:</strong> Las fracciones <em>propias</em> representan cantidades que no llegan a completar un entero (como 3/8). Las <em>impropias</em> exceden el entero y se pueden representar con más de una figura (como 8/5)." data-en="🐆 <strong>Wild Tip:</strong> <em>Proper</em> fractions represent quantities that are less than a whole (like 3/8). <em>Improper</em> fractions exceed a whole and can be represented using more than one figure (like 8/5).">🐆 <strong>Consejo Salvaje:</strong> Las fracciones <em>propias</em> representan cantidades que no llegan a completar un entero (como 3/8). Las <em>impropias</em> exceden el entero y se pueden representar con más de una figura (como 8/5).</span>
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px;">
+        <button class="btn-check-3d" onclick="checkTab3()">✅ <span class="tx" data-es="Revisar Expedición Animal" data-en="Check Animal Expedition">Revisar Expedición Animal</span></button>
+        <span id="fb-tab3" class="feedback"></span>
+        <button id="btn-code3" class="btn-3d" style="display:none; background:#6f42c1; color:white; font-size: 24px; padding: 20px 50px; margin-top: 30px;" onclick="revealCode('code-tab3')">🎁 <span class="tx" data-es="Generar Código Secreto" data-en="Generate Secret Code">Generar Código Secreto</span></button>
+        <div id="code-tab3" class="code-reveal">2024</div>
+    </div>
+</div>
+
+<!-- PESTAÑA 4: Cocina de Arepas -->
+<div id="tab4" class="tab-content">
+    <div class="info-box">
+        <strong>🧀 <span class="tx" data-es="El Reto Gastronómico Colombiano" data-en="The Colombian Gastronomic Challenge">El Reto Gastronómico Colombiano</span></strong><br>
+        <span class="tx" data-es="¡Ponte el delantal! En la cocina también se usan muchas matemáticas. Lee estas recetas típicas y resuelve los problemas fraccionarios." data-en="Put on your apron! Math is used a lot in the kitchen too. Read these typical recipes and solve the fractional problems.">¡Ponte el delantal! En la cocina también se usan muchas matemáticas. Lee estas recetas típicas y resuelve los problemas fraccionarios.</span>
+    </div>
+    
+    <div class="masonry-layout">
+        <div class="masonry-item activity-box">
+            <h3>1. <span class="tx" data-es="Desayuno Familiar" data-en="Family Breakfast">Desayuno Familiar</span></h3>
+            <span class="emoji-icon anim-pulse">🫓</span>
+            <p><span class="tx" data-es="Necesitamos servir exactamente un número mixto: 2 arepas enteras y 1/4 de la tercera arepa. Haz clic sobre los pedazos para rellenarlos." data-en="We need to serve exactly a mixed number: 2 whole arepas and 1/4 of the third arepa. Click on the pieces to fill them.">Necesitamos servir exactamente un número mixto: 2 arepas enteras y 1/4 de la tercera arepa. Haz clic sobre los pedazos para rellenarlos.</span></p>
+            <div style="display: flex; gap: 20px; justify-content: center; background: var(--bg); padding: 30px; border-radius: 15px; border: 3px solid var(--border);">
+                <div id="arepa1"></div><div id="arepa2"></div><div id="arepa3"></div>
+            </div>
+        </div>
+
+        <div class="masonry-item activity-box">
+            <h3>2. <span class="tx" data-es="Leche para el Chocolate" data-en="Milk for the Chocolate">Leche para el Chocolate</span></h3>
+            <span class="emoji-icon anim-wiggle">🥛</span>
+            <p><span class="tx" data-es="Convierte la fracción impropia 5/2 de tazas de leche a un número mixto (Entero y fracción propia)." data-en="Convert the improper fraction 5/2 cups of milk to a mixed number (Whole and proper fraction).">Convierte la fracción impropia 5/2 de tazas de leche a un número mixto (Entero y fracción propia).</span></p>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 15px; background: var(--surface); padding: 20px; border-radius: 15px; border: 2px dashed var(--secondary);">
+                <input type="number" id="t4-e2" class="big-number-input" style="height:60px;" placeholder="Ent"> <span style="font-size: 40px; margin: 0 10px; opacity: 0.5;">|</span>
+                <input type="number" id="t4-n2" placeholder="Num"> <span style="font-size: 30px; font-weight:bold;">/</span> <input type="number" id="t4-d2" placeholder="Den">
+            </div>
+        </div>
+
+        <div class="masonry-item activity-box">
+            <h3>3. <span class="tx" data-es="Doble Porción de Queso" data-en="Double Cheese Portion">Doble Porción de Queso</span></h3>
+            <span class="emoji-icon anim-bounce">🧀</span>
+            <p><span class="tx" data-es="Necesitamos 6/4 de libra de queso. ¿Esta nueva cantidad representa una fracción propia?" data-en="We need 6/4 of a pound of cheese. Does this new amount represent a proper fraction?">Necesitamos 6/4 de libra de queso. ¿Esta nueva cantidad representa una fracción propia?</span></p>
+            <div class="tf-toggle" id="t4-tf3">
+                <button class="tf-btn true" onclick="setTF(this, true, 't4-tf3')">✅ <span class="tx" data-es="Sí, es Propia" data-en="Yes, it's Proper">Sí, es Propia</span></button>
+                <button class="tf-btn false" onclick="setTF(this, false, 't4-tf3')">❌ <span class="tx" data-es="No, es Impropia" data-en="No, it's Improper">No, es Impropia</span></button>
+            </div>
+            <input type="hidden" id="ans-t4-a3" value="">
+        </div>
+
+        <div class="masonry-item activity-box">
+            <h3>4. <span class="tx" data-es="Mantequilla Equivalente" data-en="Equivalent Butter">Mantequilla Equivalente</span></h3>
+            <span class="emoji-icon anim-pulse">🧈</span>
+            <p><span class="tx" data-es="¿Podemos afirmar que 2/4 de mantequilla es exactamente igual (equivalente) a 1/2?" data-en="Can we state that 2/4 of butter is exactly equal (equivalent) to 1/2?">¿Podemos afirmar que 2/4 de mantequilla es exactamente igual (equivalente) a 1/2?</span></p>
+            <div class="tf-toggle" id="t4-tf4">
+                <button class="tf-btn true" onclick="setTF(this, true, 't4-tf4')">✅ <span class="tx" data-es="Sí, son equivalentes" data-en="Yes, equivalent">Sí, son equivalentes</span></button>
+                <button class="tf-btn false" onclick="setTF(this, false, 't4-tf4')">❌ <span class="tx" data-es="No, son distintas" data-en="No, different">No, son distintas</span></button>
+            </div>
+            <input type="hidden" id="ans-t4-a4" value="">
+        </div>
+
+        <div class="masonry-item activity-box" style="grid-column: 1 / -1;">
+            <h3>5. <span class="tx" data-es="Compartiendo el Postre (Lienzo Libre)" data-en="Sharing Dessert (Free Canvas)">Compartiendo el Postre (Lienzo Libre)</span></h3>
+            <span class="emoji-icon anim-float">🍮</span>
+            <p><span class="tx" data-es="Mamá trajo 1 delicioso flan de caramelo cuadrado. Somos 4 personas. Usando el generador interactivo abajo, divide el flan en 4 partes y pinta exactamente la fracción que le toca a 1 persona (1/4)." data-en="Mom brought 1 delicious square caramel flan. We are 4 people. Using the interactive generator below, divide the flan into 4 parts and paint exactly the fraction that 1 person gets (1/4).">Mamá trajo 1 delicioso flan de caramelo cuadrado. Somos 4 personas. Usando el generador interactivo abajo, divide el flan en 4 partes y pinta exactamente la fracción que le toca a 1 persona (1/4).</span></p>
+            
+            <div style="display: flex; gap: 20px; align-items: center; justify-content: center; flex-wrap: wrap; background: var(--bg); padding: 20px; border-radius: 15px; border: 2px dashed var(--secondary);">
+                <div>
+                    <label><strong><span class="tx" data-es="Divisiones" data-en="Divisions">Divisiones</span>:</strong></label>
+                    <input type="number" id="t4-flan-div" min="1" max="10" value="1" style="width: 80px;">
+                    <button class="btn-3d" style="padding: 10px;" onclick="generateFlan()">⚙️</button>
+                </div>
+                <div id="flan-container" style="width: 200px; height: 200px; background: white; border: 3px solid #d35400; border-radius: 10px; display: flex; flex-wrap: wrap; overflow: hidden;">
+                    <div style="width: 100%; height: 100%; background: #f39c12; cursor: pointer;" class="slice-flan" onclick="fillFlan(this)"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 4 INFO/TIP -->
+    <div class="tip-card-b">
+        <span class="tx" data-es="🧀 <strong>Tip Delicioso:</strong> Las fracciones equivalentes se ven diferentes pero representan la misma proporción. En repostería, usar 2/4 de taza de harina es exactamente lo mismo que medir 1/2 taza." data-en="🧀 <strong>Delicious Tip:</strong> Equivalent fractions look different but represent the same proportion. In baking, using 2/4 of a cup of flour is exactly the same as measuring 1/2 of a cup.">🧀 <strong>Tip Delicioso:</strong> Las fracciones equivalentes se ven diferentes pero representan la misma proporción. En repostería, usar 2/4 de taza de harina es exactamente lo mismo que medir 1/2 taza.</span>
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px;">
+        <button class="btn-check-3d" onclick="checkTab4()">✅ <span class="tx" data-es="Revisar Todo el Menú" data-en="Check Full Menu">Revisar Todo el Menú</span></button>
+        <span id="fb-tab4" class="feedback"></span>
+        <button id="btn-code4" class="btn-3d" style="display:none; background:#6f42c1; color:white; font-size: 24px; padding: 20px 50px; margin-top: 30px;" onclick="revealCode('code-tab4')">🎁 <span class="tx" data-es="Generar Código Secreto" data-en="Generate Secret Code">Generar Código Secreto</span></button>
+        <div id="code-tab4" class="code-reveal">9999</div>
+    </div>
+</div>
+
+<!-- PESTAÑA 5: Escarabajos -->
+<div id="tab5" class="tab-content">
+    <div class="info-box">
+        <strong>⛰️ <span class="tx" data-es="El Reto de la Montaña (Los Escarabajos)" data-en="The Mountain Challenge (The Cyclists)">El Reto de la Montaña (Los Escarabajos)</span></strong><br>
+        <span class="tx" data-es="Ayuda al equipo de ciclismo a calcular sus rutas resolviendo estos problemas con fracciones. ¡Consigue mínimo 4 respuestas correctas para obtener el código!" data-en="Help the cycling team calculate their routes by solving these fraction problems. Get at least 4 correct answers to unlock the code!">Ayuda al equipo de ciclismo a calcular sus rutas resolviendo estos problemas con fracciones. ¡Consigue mínimo 4 respuestas correctas para obtener el código!</span>
+    </div>
+    
+    <div class="masonry-layout">
+        <div class="masonry-item activity-box">
+            <h3>1. <span class="tx" data-es="Simplificar la Ruta" data-en="Simplify the Route">Simplificar la Ruta</span></h3>
+            <span class="emoji-icon anim-bounce">🚴</span>
+            <p><span class="tx" data-es="Mueve el deslizador para simplificar la fracción 8/16 hasta encontrar su mínima expresión." data-en="Move the slider to simplify the fraction 8/16 until finding its simplest form.">Mueve el deslizador para simplificar la fracción 8/16 hasta encontrar su mínima expresión.</span></p>
+            <div style="text-align: center; margin: 20px 0; background: var(--surface); padding: 25px; border-radius: 15px; border: 3px solid var(--secondary); box-shadow: inset 0 5px 10px rgba(0,0,0,0.1);">
+                <span style="font-size: 45px; font-weight: bold; color: var(--accent);" id="simp-display">8 / 16</span><br>
+                <input type="range" min="1" max="4" value="1" id="t5-slider" style="width: 90%; margin-top: 25px; cursor: pointer; height: 15px;" oninput="updateSimp()">
+            </div>
+        </div>
+
+        <div class="masonry-item activity-box">
+            <h3>2. <span class="tx" data-es="Velocidad en el Páramo" data-en="Velocity in the Páramo">Velocidad en el Páramo</span></h3>
+            <span class="emoji-icon anim-pulse">⏱️</span>
+            <p><span class="tx" data-es="Convierte la fracción impropia 13/5 a un número mixto." data-en="Convert the improper fraction 13/5 to a mixed number.">Convierte la fracción impropia 13/5 a un número mixto.</span></p>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                <input type="number" id="t5-e2" class="big-number-input" style="height:60px;" placeholder="Ent"> <span style="font-size: 40px; margin: 0 10px; opacity: 0.5;">|</span>
+                <input type="number" id="t5-n2" placeholder="Num"> <span style="font-size: 30px; font-weight:bold;">/</span> <input type="number" id="t5-d2" placeholder="Den">
+            </div>
+        </div>
+
+        <div class="masonry-item activity-box">
+            <h3>3. <span class="tx" data-es="Hidratación Estratégica (Ordenar)" data-en="Strategic Hydration (Order)">Hidratación Estratégica (Ordenar)</span></h3>
+            <span class="emoji-icon anim-wiggle">💧</span>
+            <p><span class="tx" data-es="Para saber cuánta agua queda (4/12), debemos simplificar. Ordena los pasos para simplificar una fracción:" data-en="To know how much water is left (4/12), we must simplify. Order the steps to simplify a fraction:">Para saber cuánta agua queda (4/12), debemos simplificar. Ordena los pasos para simplificar una fracción:</span></p>
+            <ul id="sort-list-2" class="sortable-list">
+                <li data-val="3"><span><span class="tx" data-es="C. Obtener la nueva fracción irreductible" data-en="C. Get the new irreducible fraction">C. Obtener la nueva fracción irreductible</span></span> <div class="sort-controls"><button onclick="moveUp(this)">⬆</button><button onclick="moveDown(this)">⬇</button></div></li>
+                <li data-val="1"><span><span class="tx" data-es="A. Buscar un número que divida al numerador y denominador" data-en="A. Find a number that divides numerator and denominator">A. Buscar un número que divida al numerador y denominador</span></span> <div class="sort-controls"><button onclick="moveUp(this)">⬆</button><button onclick="moveDown(this)">⬇</button></div></li>
+                <li data-val="2"><span><span class="tx" data-es="B. Dividir ambos números por ese mismo valor" data-en="B. Divide both numbers by that same value">B. Dividir ambos números por ese mismo valor</span></span> <div class="sort-controls"><button onclick="moveUp(this)">⬆</button><button onclick="moveDown(this)">⬇</button></div></li>
+            </ul>
+        </div>
+
+        <div class="masonry-item activity-box">
+            <h3>4. <span class="tx" data-es="Comparando Pendientes" data-en="Comparing Slopes">Comparando Pendientes</span></h3>
+            <span class="emoji-icon anim-float">⛰️</span>
+            <p><span class="tx" data-es="Al tener denominadores iguales, ¿Es correcto decir que la pendiente de Egan (5/8) es más dura (mayor) que la de López (3/8)?" data-en="Having equal denominators, is it correct to say that Egan's slope (5/8) is harder (greater) than López's (3/8)?">Al tener denominadores iguales, ¿Es correcto decir que la pendiente de Egan (5/8) es más dura (mayor) que la de López (3/8)?</span></p>
+            <div class="tf-toggle" id="t5-tf4">
+                <button class="tf-btn true" onclick="setTF(this, true, 't5-tf4')">✅ <span class="tx" data-es="Sí, 5/8 es mayor" data-en="Yes, 5/8 is greater">Sí, 5/8 es mayor</span></button>
+                <button class="tf-btn false" onclick="setTF(this, false, 't5-tf4')">❌ <span class="tx" data-es="No, 3/8 es mayor" data-en="No, 3/8 is greater">No, 3/8 es mayor</span></button>
+            </div>
+            <input type="hidden" id="ans-t5-a4" value="">
+        </div>
+
+        <div class="masonry-item activity-box">
+            <h3>5. <span class="tx" data-es="El Descenso Final" data-en="The Final Descent">El Descenso Final</span></h3>
+            <span class="emoji-icon anim-pulse">🏁</span>
+            <p><span class="tx" data-es="Los ciclistas recorrieron 2/10 de la ruta en la mañana y 5/10 en la tarde. ¿Qué fracción de la ruta han recorrido en total sumándolas?" data-en="The cyclists rode 2/10 of the route in the morning and 5/10 in the afternoon. What fraction of the route have they ridden in total by adding them?">Los ciclistas recorrieron 2/10 de la ruta en la mañana y 5/10 en la tarde. ¿Qué fracción de la ruta han recorrido en total sumándolas?</span></p>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 15px; background: var(--surface); padding: 20px; border-radius: 15px; border: 2px dashed var(--secondary);">
+                <input type="number" id="t5-n5" placeholder="Num"> <span style="font-size: 30px; font-weight:bold;">/</span> <input type="number" id="t5-d5" placeholder="Den">
+            </div>
+        </div>
+
+        <div class="masonry-item activity-box">
+            <h3>6. <span class="tx" data-es="El Sprint de Nairo" data-en="Nairo's Sprint">El Sprint de Nairo</span></h3>
+            <span class="emoji-icon anim-wiggle">🚴‍♂️</span>
+            <p><span class="tx" data-es="Rigo completó 3/4 de la etapa y Nairo 5/8. Para compararlos en una carrera justa, necesitamos un denominador común. ¿Cuál es el mínimo común múltiplo (MCM) entre 4 y 8?" data-en="Rigo completed 3/4 of the stage and Nairo 5/8. To compare them in a fair race, we need a common denominator. What is the least common multiple (LCM) between 4 and 8?">Rigo completó 3/4 de la etapa y Nairo 5/8. Para compararlos en una carrera justa, necesitamos un denominador común. ¿Cuál es el mínimo común múltiplo (MCM) entre 4 y 8?</span></p>
+            <div style="display: flex; align-items: center; justify-content: center; background: var(--surface); padding: 20px; border-radius: 15px; border: 2px dashed var(--secondary);">
+                <input type="number" id="t5-q6" class="big-number-input" placeholder="MCM">
+            </div>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 5 INFO/TIP -->
+    <div class="tip-card-a">
+        <span class="tx" data-es="🚴 <strong>Tip de la Montaña:</strong> Cuando simplificas o sumas fracciones con el mismo denominador, mantienes las bases de las proporciones intactas y solo manipulas las cantidades de arriba (los numeradores)." data-en="🚴 <strong>Mountain Tip:</strong> When you simplify or add fractions with the same denominator, you keep the bases of the proportions intact and only manipulate the quantities on top (the numerators).">🚴 <strong>Tip de la Montaña:</strong> Cuando simplificas o sumas fracciones con el mismo denominador, mantienes las bases de las proporciones intactas y solo manipulas las cantidades de arriba (los numeradores).</span>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <button class="btn-check-3d" onclick="checkTab5()">✅ <span class="tx" data-es="Cruzar la Meta" data-en="Cross the Finish Line">Cruzar la Meta</span></button>
+        <span id="fb-tab5" class="feedback"></span>
+        <button id="btn-code5" class="btn-3d" style="display:none; background:#6f42c1; color:white; font-size: 24px; padding: 20px 50px; margin-top: 30px;" onclick="revealCode('code-tab5')">🎁 <span class="tx" data-es="Generar Código Final" data-en="Generate Final Code">Generar Código Final</span></button>
+        <div id="code-tab5" class="code-reveal">1000</div>
+    </div>
+</div>
+
+<!-- PESTAÑA 6: Conclusiones / Evaluación -->
+<div id="tab6" class="tab-content">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h2 style="font-size: 32px; color: var(--secondary);"><span class="tx" data-es="📝 Evaluación Final (12 Preguntas)" data-en="📝 Final Evaluation (12 Questions)">📝 Evaluación Final (12 Preguntas)</span></h2>
+        <p style="font-size: 18px;"><span class="tx" data-es="Demuestra todo lo que aprendiste en tu viaje por Colombia." data-en="Show everything you learned on your trip through Colombia.">Demuestra todo lo que aprendiste en tu viaje por Colombia.</span></p>
+    </div>
+    
+    <div id="quiz-container" class="masonry-layout"></div>
+    
+    <button class="btn-check-3d" style="font-size: 24px; padding: 20px;" onclick="calculateQuiz()">📊 <span class="tx" data-es="Calificar Examen Final" data-en="Grade Final Exam">Calificar Examen Final</span></button>
+    
+    <div class="pie-chart-container" style="text-align: center; margin-top: 40px;">
+        <h2 id="quiz-result" style="font-size: 32px; color: var(--primary-dark);"></h2>
+        <div id="pie-chart"></div>
+    </div>
+
+    <!-- PESTAÑA 6 INFO/TIP -->
+    <div class="tip-card-b">
+        <span class="tx" data-es="🏆 <strong>Tip del Triunfador:</strong> Las fracciones están en todos lados: en el diseño, la cocina, las ciencias y el arte. ¡Sigue aplicando estos conocimientos para entender el universo!" data-en="🏆 <strong>Winner's Tip:</strong> Fractions are everywhere: in design, cooking, science, and art. Keep applying this knowledge to understand the universe!">🏆 <strong>Tip del Triunfador:</strong> Las fracciones están en todos lados: en el diseño, la cocina, las ciencias y el arte. ¡Sigue aplicando estos conocimientos para entender el universo!</span>
+    </div>
+
+    <div id="visual-summary" style="display: none; margin-top: 50px; border-top: 4px solid var(--border); padding-top: 40px;">
+        <h2 style="text-align: center; color: var(--secondary); font-size: 32px;"><span class="tx" data-es="📚 Resumen de tu Aventura" data-en="📚 Journey Summary">📚 Resumen de tu Aventura</span></h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px; margin-top: 30px;">
+            <div class="summary-card activity-box">
+                <span class="emoji-icon anim-pulse">🔢</span>
+                <h4 style="font-size: 22px; color: var(--secondary); margin: 10px 0;"><span class="tx" data-es="Partes de la Fracción" data-en="Fraction Parts">Partes de la Fracción</span></h4>
+                <p><span class="tx" data-es="Numerador (Cuenta las partes). Denominador (El total en que se dividió)." data-en="Numerator (Counts the parts). Denominator (Total parts divided into).">Numerador (Cuenta las partes). Denominador (El total en que se dividió).</span></p>
+            </div>
+            <div class="summary-card activity-box">
+                <span class="emoji-icon anim-float">🍏</span>
+                <h4 style="font-size: 22px; color: var(--success); margin: 10px 0;"><span class="tx" data-es="Propias" data-en="Proper">Propias</span></h4>
+                <p><span class="tx" data-es="Numerador MENOR al Denominador. Ejemplo: 1/4. (Menos de 1 entero)." data-en="Numerator LESS than Denominator. Example: 1/4. (Less than 1 whole).">Numerador MENOR al Denominador. Ejemplo: 1/4. (Menos de 1 entero).</span></p>
+            </div>
+            <div class="summary-card activity-box">
+                <span class="emoji-icon anim-bounce">🍉</span>
+                <h4 style="font-size: 22px; color: var(--accent); margin: 10px 0;"><span class="tx" data-es="Impropias" data-en="Improper">Impropias</span></h4>
+                <p><span class="tx" data-es="Numerador MAYOR al Denominador. Ejemplo: 5/4. (Más de 1 entero)." data-en="Numerator GREATER than Denominator. Example: 5/4. (More than 1 whole).">Numerador MAYOR al Denominador. Ejemplo: 5/4. (Más de 1 entero).</span></p>
+            </div>
+            <div class="summary-card activity-box">
+                <span class="emoji-icon anim-wiggle">⚖️</span>
+                <h4 style="font-size: 22px; color: var(--primary-dark); margin: 10px 0;"><span class="tx" data-es="Equivalentes" data-en="Equivalent">Equivalentes</span></h4>
+                <p><span class="tx" data-es="Fracciones que valen exactamente lo mismo, aunque sus números sean distintos. (1/2 = 2/4)." data-en="Fractions that are worth exactly the same, even if their numbers are different. (1/2 = 2/4).">Fracciones que valen exactamente lo mismo, aunque sus números sean distintos. (1/2 = 2/4).</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer style="background: var(--secondary-dark); color: white; text-align: center; padding: 30px; margin-top: 60px; font-size: 18px; border-top: 8px solid var(--primary);">
+    <span class="tx" data-es="Desarrollador: David Beleño | Recursos didácticos interactivos para matemáticas | Nivel: Primaria" data-en="Developer: David Beleño | Interactive educational resources for math | Level: Elementary">Desarrollador: David Beleño | Recursos didácticos interactivos para matemáticas | Nivel: Primaria</span>
+</footer>
+
+<script>
+    // --- AJUSTE 3: COMENZAR EN INGLÉS POR DEFECTO ---
+    let isEnglish = true; 
+    
+    function toggleLang() {
+        isEnglish = !isEnglish;
+        updateLanguageDOM();
+        playSound('click');
+        buildQuiz();
+        
+        let logicQ = document.getElementById('logic-question');
+        if (logicQ && currentLogic) {
+            logicQ.innerHTML = `<span class="tx" data-en="${currentLogic.en}" data-es="${currentLogic.es}">${isEnglish ? currentLogic.en : currentLogic.es}</span>`;
+        }
+    }
+    
+    function updateLanguageDOM() {
+        document.querySelectorAll('.tx').forEach(el => {
+            if(!el.dataset.en) el.dataset.en = el.innerHTML;
+            el.innerHTML = isEnglish ? el.dataset.en : el.dataset.es;
+        });
+    }
+
+    // --- SISTEMA DE AUDIO ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx, soundEnabled = true;
+    function initAudio() { if (!audioCtx) audioCtx = new AudioContext(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
+    function toggleSound() { soundEnabled = !soundEnabled; document.getElementById("sound-btn").textContent = soundEnabled ? "🔊" : "🔇"; if(soundEnabled) playSound('click'); }
+    
+    function playSound(type) {
+        if (!soundEnabled) return; initAudio();
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination); const now = audioCtx.currentTime;
+        
+        if (type === 'click') { 
+            osc.type = 'sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now + 0.1); 
+            gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1); osc.start(now); osc.stop(now + 0.1); 
+        } 
+        else if (type === 'unlock') { 
+            osc.type = 'square'; osc.frequency.setValueAtTime(400, now); osc.frequency.setValueAtTime(600, now + 0.2); 
+            gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.4); osc.start(now); osc.stop(now + 0.4); 
+        } 
+        else if (type === 'error') { 
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.3); 
+            gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.3); osc.start(now); osc.stop(now + 0.3); 
+        }
+        else if (type === 'victory') {
+            osc.type = 'triangle'; gain.gain.setValueAtTime(0.2, now);
+            osc.frequency.setValueAtTime(440, now); osc.frequency.setValueAtTime(554.37, now + 0.1); 
+            osc.frequency.setValueAtTime(659.25, now + 0.2); osc.frequency.setValueAtTime(880, now + 0.3); 
+            gain.gain.linearRampToValueAtTime(0, now + 0.6); osc.start(now); osc.stop(now + 0.6);
+        }
+    }
+
+    function toggleTheme() { playSound('click'); const b = document.body; b.getAttribute("data-theme") === "dark" ? b.removeAttribute("data-theme") : b.setAttribute("data-theme", "dark"); }
+
+    function showVictoryModal(msgEs, msgEn) {
+        document.getElementById('victory-msg').innerHTML = isEnglish ? msgEn : msgEs;
+        document.getElementById('victory-title').innerHTML = isEnglish ? "¡Excelente trabajo!" : "Great Job!";
+        document.getElementById('victory-modal').style.display = 'flex';
+        playSound('victory');
+    }
+    function closeVictory() { playSound('click'); document.getElementById('victory-modal').style.display = 'none'; }
+
+    // --- PESTAÑAS Y BLOQUEOS ---
+    const codes = { 'tab2': '1234', 'tab3': '5678', 'tab4': '2024', 'tab5': '9999', 'tab6': '1000' };
+    const unlocked = { 'tab1': true, 'tab2': false, 'tab3': false, 'tab4': false, 'tab5': false, 'tab6': false };
+    function openTab(evt, id) {
+        playSound('click');
+        if (!unlocked[id]) {
+            let userCode = prompt(isEnglish ? "🔒 Enter the 4-digit secret code:" : "🔒 Ingresa el código secreto de 4 dígitos:");
+            if (userCode === codes[id]) { 
+                unlocked[id] = true; evt.currentTarget.classList.remove('locked'); 
+                evt.currentTarget.innerHTML = evt.currentTarget.innerHTML.replace('🔒', '🔓'); 
+                playSound('unlock'); 
+            } else { playSound('error'); alert(isEnglish ? "❌ Incorrect code." : "❌ Código incorrecto."); return; }
+        }
+        document.querySelectorAll(".tab-content, .tab-link").forEach(el => el.classList.remove("active"));
+        document.getElementById(id).classList.add("active"); evt.currentTarget.classList.add("active");
+    }
+    function revealCode(id) { playSound('unlock'); document.getElementById(id).style.display = 'block'; }
+    
+    function showFeedback(fbId, isCorrect, msgEs, msgEn) {
+        let fb = document.getElementById(fbId);
+        fb.innerHTML = (isCorrect ? "✅ " : "❌ ") + (isEnglish ? msgEn : msgEs);
+        fb.className = "feedback show " + (isCorrect ? "correct" : "incorrect");
+        if(isCorrect) playSound('unlock'); else playSound('error');
+    }
+
+    // --- AJUSTE 4: SISTEMA DE INDICADOR FLOTANTE ---
+    window.addEventListener('scroll', () => {
+        const bubble = document.getElementById('progress-bubble');
+        if (!bubble) return;
+        
+        // Seguimiento de desplazamiento de compensación de planeo dinámico
+        const scrollTop = window.scrollY;
+        bubble.style.top = (scrollTop + 170) + 'px';
+        
+        // Calcular el porcentaje de desplazamiento de la página
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrollPercent = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
+        
+        // Actualizar anillo de progreso SVG
+        const fill = document.getElementById('progress-bar-fill');
+        const text = bubble.querySelector('.progress-text');
+        if (fill && text) {
+            const r = 28;
+            const circumference = 2 * Math.PI * r;
+            const offset = circumference - (scrollPercent / 100) * circumference;
+            fill.style.strokeDashoffset = offset;
+            text.textContent = scrollPercent + '%';
+        }
+    });
+
+    // --- ACTIVIDADES DE LA PESTAÑA 1 ---
+    let wordLocations = {};
+    function initWordSearch() {
+        const wsWords = ["FRACTION", "WHOLE", "NUMERATOR", "DENOMINATOR", "BAR", "EQUAL", "SET", "SECTION", "SQUARE", "CIRCLE", "PARTS"];
+        const size = 12;
+        let grid = Array(size).fill(null).map(() => Array(size).fill(''));
+        let placedWords = {};
+
+        const dirs = [
+            [0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [-1, -1], [1, -1], [-1, 1]
+        ];
+
+        let sortedWords = [...wsWords].sort((a,b) => b.length - a.length);
+
+        function tryPlace(word) {
+            let shuffledDirs = [...dirs].sort(() => Math.random() - 0.5);
+            for (let d of shuffledDirs) {
+                let dRow = d[0], dCol = d[1];
+                let positions = [];
+                for (let r=0; r<size; r++) {
+                    for (let c=0; c<size; c++) {
+                        positions.push({r, c});
+                    }
+                }
+                positions.sort(() => Math.random() - 0.5);
+
+                for (let pos of positions) {
+                    let r = pos.r, c = pos.c;
+                    let fits = true;
+                    let coords = [];
+
+                    for (let i=0; i<word.length; i++) {
+                        let nr = r + i * dRow;
+                        let nc = c + i * dCol;
+
+                        if (nr < 0 || nr >= size || nc < 0 || nc >= size) { fits = false; break; }
+                        if (grid[nr][nc] !== '' && grid[nr][nc] !== word[i]) { fits = false; break; }
+                        coords.push({r: nr, c: nc});
+                    }
+
+                    if (fits) {
+                        for (let i=0; i<word.length; i++) {
+                            grid[coords[i].r][coords[i].c] = word[i];
+                        }
+                        placedWords[word] = coords;
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        let success = false;
+        let attempts = 0;
+        while (!success && attempts < 100) {
+            grid = Array(size).fill(null).map(() => Array(size).fill(''));
+            placedWords = {};
+            success = true;
+            for (let word of sortedWords) {
+                if (!tryPlace(word)) { success = false; break; }
+            }
+            attempts++;
+        }
+
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        for (let r=0; r<size; r++) {
+            for (let c=0; c<size; c++) {
+                if (grid[r][c] === '') {
+                    grid[r][c] = alphabet[Math.floor(Math.random() * alphabet.length)];
+                }
+            }
+        }
+
+        const wsContainer = document.getElementById('word-search');
+        wsContainer.innerHTML = '';
+        for (let r=0; r<size; r++) {
+            for (let c=0; c<size; c++) {
+                let cell = document.createElement('div');
+                cell.className = 'ws-cell';
+                cell.innerText = grid[r][c];
+                cell.dataset.row = r;
+                cell.dataset.col = c;
+                cell.onclick = () => {
+                    playSound('click');
+                    cell.classList.toggle('selected');
+                };
+                wsContainer.appendChild(cell);
+            }
+        }
+        wordLocations = placedWords;
+    }
+
+    // AJUSTE 2: Comentarios guiados sobre la búsqueda de palabras
+    function checkWordSearch() {
+        let selectedCoords = new Set();
+        document.querySelectorAll('.ws-cell.selected').forEach(cell => {
+            selectedCoords.add(cell.dataset.row + "," + cell.dataset.col);
+        });
+
+        let foundWords = [];
+        for (let word in wordLocations) {
+            let allLettersFound = true;
+            for (let coord of wordLocations[word]) {
+                if (!selectedCoords.has(coord.r + "," + coord.c)) {
+                    allLettersFound = false;
+                    break;
+                }
+            }
+            if (allLettersFound) foundWords.push(word);
+        }
+
+        const totalWords = Object.keys(wordLocations).length;
+        if (foundWords.length === totalWords) {
+            showFeedback('ws-feedback', true,
+                "¡Excelente! Encontraste las 11 palabras clave. Explicación: Estas palabras representan la estructura, las formas geométricas y los componentes principales de las fracciones.",
+                "Excellent! You found all 11 key words. Explanation: These words represent the structure, geometric shapes, and main components of fractions."
+            );
+        } else {
+            let msgEs = `Has encontrado ${foundWords.length} de ${totalWords} palabras. Consejo: Busca con paciencia en diagonales y al revés. ¡Tú puedes lograr el puntaje completo!`;
+            let msgEn = `You found ${foundWords.length} of ${totalWords} words. Advice: Search patiently diagonally and backwards. You can achieve full score!`;
+            showFeedback('ws-feedback', false, msgEs, msgEn);
+        }
+    }
+
+    // --- AJUSTE 1: ESCENARIOS GEOMÉTRICOS ALEATORIOS ---
+    const logicScenarios = [
+        {
+            es: "En las selvas de Chocó, un artesano recolectó frutos de achiote para pintar canastos. Dividió su lienzo rectangular en 8 partes iguales y utilizó 3 partes para teñirlas de un rojo intenso. ¿Qué fracción del lienzo representan las partes pintadas? ¡Pinta la figura abajo antes de responder!",
+            en: "In the jungles of Chocó, an artisan collected achiote fruits to paint baskets. He divided his rectangular canvas into 8 equal parts and used 3 parts to dye them a deep red. What fraction of the canvas represents the painted parts? Paint the figure below before answering!",
+            n: 3, d: 8, shape: 'rect', divisions: 8
+        },
+        {
+            es: "Durante el secado del café en una finca de Fredonia, un caficultor extendió los granos sobre una mesa dividida en 10 secciones iguales. Si el sol alcanzó a calentar 7 de estas secciones, ¿qué fracción representa la parte que recibió calor directo? ¡Pinta las secciones correspondientes en la figura!",
+            en: "During coffee drying on a farm in Fredonia, a coffee grower spread the beans over a table divided into 10 equal sections. If the sun heated 7 of these sections, what fraction represents the part that received direct heat? Paint the corresponding sections in the figure!",
+            n: 7, d: 10, shape: 'rect', divisions: 10
+        },
+        {
+            es: "Una colorida chiva de turismo recorre los pueblos de Antioquia con 12 asientos en total. Si durante el viaje se ocupan 5 asientos por campesinos tocando tiple, ¿qué fracción representa los asientos ocupados? ¡Colorea los asientos ocupados en el camión de abajo!",
+            en: "A colorful tourist chiva travels through the towns of Antioquia with 12 seats in total. If during the trip 5 seats are occupied by farmers playing tiple, what fraction represents the occupied seats? Color the occupied seats in the bus below!",
+            n: 5, d: 12, shape: 'grid', divisions: 12
+        },
+        {
+            es: "En las minas de Muzo, un buscador de tesoros colocó 9 hermosas esmeraldas en una bandeja. Al revisarlas, descubrió que 4 de ellas tenían un brillo verde de alta calidad. ¿Qué fracción representa las esmeraldas perfectas? ¡Píntalas en el exhibidor!",
+            en: "In the mines of Muzo, a treasure hunter placed 9 beautiful emeralds on a tray. Upon review, he discovered that 4 of them had high-quality green brilliance. What fraction represents the perfect emeralds? Paint them on the display tray!",
+            n: 4, d: 9, shape: 'emeralds', divisions: 9
+        },
+        {
+            es: "En la Sierra Nevada, apicultores cosecharon 6 panales de miel orgánica silvestre de un total de 7 cajones instalados. ¿Qué fracción de los cajones fue recolectada? ¡Ilustra el proceso pintando los círculos correspondientes!",
+            en: "In the Sierra Nevada, beekeepers harvested 6 honeycombs of wild organic honey out of a total of 7 boxes installed. What fraction of the boxes was harvested? Illustrate the process by coloring the corresponding circles!",
+            n: 6, d: 7, shape: 'circles', divisions: 7
+        }
+    ];
+
+    let currentLogic = {};
+    let selectedSlicesCount = 0;
+
+    function initRiddle() {
+        currentLogic = logicScenarios[Math.floor(Math.random() * logicScenarios.length)];
+        let logicQ = document.getElementById('logic-question');
+        logicQ.innerHTML = `<span class="tx" data-en="${currentLogic.en}" data-es="${currentLogic.es}">${isEnglish ? currentLogic.en : currentLogic.es}</span>`;
+        document.getElementById('logic-num').value = "";
+        document.getElementById('logic-den').value = "";
+        selectedSlicesCount = 0;
+        renderInteractiveVisual();
+    }
+
+    // Genera el SVG correspondiente a la historia seleccionada dinámicamente (Ajuste 1)
+    function renderInteractiveVisual() {
+        const container = document.getElementById('riddle-visual-container');
+        container.innerHTML = '';
+        selectedSlicesCount = 0;
+        
+        let svgNS = "http://www.w3.org/2000/svg";
+        let svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("width", "100%");
+        svg.setAttribute("height", "130");
+        svg.style.maxWidth = "400px";
+
+        const divCount = currentLogic.divisions;
+
+        if (currentLogic.shape === 'rect') {
+            const width = 380 / divCount;
+            for (let i = 0; i < divCount; i++) {
+                let rect = document.createElementNS(svgNS, "rect");
+                rect.setAttribute("x", 10 + i * width);
+                rect.setAttribute("y", 25);
+                rect.setAttribute("width", width - 4);
+                rect.setAttribute("height", "80");
+                rect.setAttribute("rx", "5");
+                rect.setAttribute("fill", "var(--surface)");
+                rect.setAttribute("stroke", "var(--secondary)");
+                rect.setAttribute("stroke-width", "3");
+                rect.style.cursor = "pointer";
+                rect.style.transition = "fill 0.2s";
+                rect.onclick = function() {
+                    playSound('click');
+                    if (this.getAttribute("fill") === "var(--surface)") {
+                        this.setAttribute("fill", "var(--primary)");
+                        selectedSlicesCount++;
+                    } else {
+                        this.setAttribute("fill", "var(--surface)");
+                        selectedSlicesCount--;
+                    }
+                };
+                svg.appendChild(rect);
+            }
+        } 
+        else if (currentLogic.shape === 'grid') {
+            const width = 380 / 6;
+            const height = 45;
+            for (let r = 0; r < 2; r++) {
+                for (let c = 0; c < 6; c++) {
+                    let rect = document.createElementNS(svgNS, "rect");
+                    rect.setAttribute("x", 10 + c * width);
+                    rect.setAttribute("y", 20 + r * height);
+                    rect.setAttribute("width", width - 6);
+                    rect.setAttribute("height", height - 6);
+                    rect.setAttribute("rx", "6");
+                    rect.setAttribute("fill", "var(--surface)");
+                    rect.setAttribute("stroke", "var(--secondary)");
+                    rect.setAttribute("stroke-width", "3");
+                    rect.style.cursor = "pointer";
+                    rect.onclick = function() {
+                        playSound('click');
+                        if (this.getAttribute("fill") === "var(--surface)") {
+                            this.setAttribute("fill", "var(--primary)");
+                            selectedSlicesCount++;
+                        } else {
+                            this.setAttribute("fill", "var(--surface)");
+                            selectedSlicesCount--;
+                        }
+                    };
+                    svg.appendChild(rect);
+                }
+            }
+        } 
+        else if (currentLogic.shape === 'emeralds') {
+            const spacing = 380 / 9;
+            for (let i = 0; i < 9; i++) {
+                let poly = document.createElementNS(svgNS, "polygon");
+                let cx = 20 + i * spacing + spacing/2;
+                let cy = 65;
+                poly.setAttribute("points", `${cx},${cy-28} ${cx+16},${cy} ${cx},${cy+28} ${cx-16},${cy}`);
+                poly.setAttribute("fill", "var(--surface)");
+                poly.setAttribute("stroke", "var(--secondary)");
+                poly.setAttribute("stroke-width", "3");
+                poly.style.cursor = "pointer";
+                poly.onclick = function() {
+                    playSound('click');
+                    if (this.getAttribute("fill") === "var(--surface)") {
+                        this.setAttribute("fill", "var(--success)");
+                        selectedSlicesCount++;
+                    } else {
+                        this.setAttribute("fill", "var(--surface)");
+                        selectedSlicesCount--;
+                    }
+                };
+                svg.appendChild(poly);
+            }
+        }
+        else if (currentLogic.shape === 'circles') {
+            const spacing = 380 / 7;
+            for (let i = 0; i < 7; i++) {
+                let circle = document.createElementNS(svgNS, "circle");
+                let cx = 20 + i * spacing + spacing/2;
+                let cy = 65;
+                circle.setAttribute("cx", cx);
+                circle.setAttribute("cy", cy);
+                circle.setAttribute("r", "20");
+                circle.setAttribute("fill", "var(--surface)");
+                circle.setAttribute("stroke", "var(--secondary)");
+                circle.setAttribute("stroke-width", "3");
+                circle.style.cursor = "pointer";
+                circle.onclick = function() {
+                    playSound('click');
+                    if (this.getAttribute("fill") === "var(--surface)") {
+                        this.setAttribute("fill", "var(--primary)");
+                        selectedSlicesCount++;
+                    } else {
+                        this.setAttribute("fill", "var(--surface)");
+                        selectedSlicesCount--;
+                    }
+                };
+                svg.appendChild(circle);
+            }
+        }
+        container.appendChild(svg);
+    }
+
+    // AJUSTE 2: Comprobación de acertijo guiado, sin revelación de respuesta
+    function checkLogicPuzzle() {
+        let n = parseInt(document.getElementById('logic-num').value);
+        let d = parseInt(document.getElementById('logic-den').value);
+        
+        let mistakes = [];
+        if (n !== currentLogic.n) mistakes.push(isEnglish ? "Numerator" : "Numerador");
+        if (d !== currentLogic.d) mistakes.push(isEnglish ? "Denominator" : "Denominador");
+        if (selectedSlicesCount !== currentLogic.n) mistakes.push(isEnglish ? "Interactive colored shapes" : "Figuras coloreadas interactivas");
+
+        if (mistakes.length === 0) { 
+            showFeedback('logic-feedback', true, 
+                "¡Excelente! Has resuelto el acertijo con éxito y coloreado correctamente el lienzo. Explicación: Los datos coinciden perfectamente con tu análisis.", 
+                "Excellent! You successfully solved the riddle and colored the canvas. Explanation: The inputs match perfectly with your analysis."
+            ); 
+            revealCode('code-tab1'); 
+            showVictoryModal("¡Encontraste el primer código!", "Found the first code!");
+        } else { 
+            let adviceEs = `Debes corregir: <strong>${mistakes.join(", ")}</strong>. Consejo: Lee con mucha atención los valores descritos e interactúa con el gráfico de arriba haciendo clic en las piezas correspondientes. ¡No te rindas!`;
+            let adviceEn = `You must correct: <strong>${mistakes.join(", ")}</strong>. Advice: Read carefully the values in letters and interact with the graphic above by clicking the pieces. Keep going!`;
+            showFeedback('logic-feedback', false, adviceEs, adviceEn); 
+        }
+    }
+
+    // --- PESTAÑA 2 (Taller del Creador) ---
+    const scenarios = [
+        {
+            shape: 'circular', den: 4, num: 7, qty: 2,
+            descEs: "🫓 <strong>¡Festival de la Arepa Boyacense!</strong><br>En el festival de Villa de Leyva, doña Carmen preparó deliciosas arepas redondas de maíz. Cada una se divide exactamente en <strong>4 partes iguales</strong>. Un grupo de hambrientos turistas pide un total de <strong>7 porciones</strong>.<br><br><strong>Pregunta:</strong> ¿Qué fracción representa las porciones consumidas?<br>👉 <em>Configura el Paso 3, genera el lienzo y pinta la fracción correspondiente.</em>",
+            descEn: "🫓 <strong>Boyacense Arepa Festival!</strong><br>At the Villa de Leyva festival, Doña Carmen prepared delicious round corn arepas. Each is divided into exactly <strong>4 equal parts</strong>. A group of hungry tourists orders a total of <strong>7 portions</strong>.<br><br><strong>Question:</strong> What fraction represents the consumed portions?<br>👉 <em>Configure Step 3, generate the canvas and paint the corresponding fraction.</em>"
+        },
+        {
+            shape: 'cuadrada', den: 6, num: 5, qty: 1,
+            descEs: "🍬 <strong>Bocadillo Veleño</strong><br>Don Pedro elabora bloques cuadrados de bocadillo de guayaba en Vélez. Corta cada bloque en <strong>6 porciones iguales</strong>. Su nieta reparte exactamente <strong>5 porciones</strong> entre sus compañeros de escuela.<br><br><strong>Pregunta:</strong> ¿Qué fracción representa los bocadillos repartidos respecto al total del bloque?<br>👉 <em>Configura el Paso 3, genera el lienzo y pinta la fracción correspondiente.</em>",
+            descEn: "🍬 <strong>Guava Bocadillo</strong><br>Don Pedro makes square blocks of guava bocadillo in Vélez. He cuts each block into <strong>6 equal portions</strong>. His granddaughter distributes exactly <strong>5 portions</strong> among her school classmates.<br><br><strong>Question:</strong> What fraction represents the shared bocadillos relative to the entire block?<br>👉 <em>Configure Step 3, generate the canvas and paint the corresponding fraction.</em>"
+        },
+        {
+            shape: 'cuadrada', den: 8, num: 3, qty: 1,
+            descEs: "☕ <strong>Cosecha de Café</strong><br>En una finca cafetera del Eje Cafetero, los recolectores usan bandejas cuadradas divididas en <strong>8 secciones iguales</strong> para secar el grano. Hoy solo se completaron <strong>3 secciones</strong> con café premium.<br><br><strong>Pregunta:</strong> ¿Qué fracción de la bandeja cuadrada quedó ocupada por este café?<br>👉 <em>Configura el Paso 3, genera el lienzo y pinta la fracción correspondiente.</em>",
+            descEn: "☕ <strong>Coffee Harvest</strong><br>On a coffee farm in Colombia's Coffee Axis, pickers use square trays divided into <strong>8 equal sections</strong> to dry beans. Today, only <strong>3 sections</strong> were completed with premium coffee.<br><br><strong>Question:</strong> What fraction of the square tray was occupied by this coffee?<br>👉 <em>Configure Step 3, generate the canvas and paint the corresponding fraction.</em>"
+        },
+        {
+            shape: 'circular', den: 5, num: 9, qty: 2,
+            descEs: "🍕 <strong>Pizzas de Chontaduro en Cali</strong><br>En una pizzería de Cali se inventó una pizza redonda con sabor a chontaduro. Dividen cada pizza en <strong>5 porciones iguales</strong>. Un grupo de bailarines de salsa consume <strong>9 porciones</strong> en total después de ensayar.<br><br><strong>Pregunta:</strong> ¿Qué fracción representa el consumo de los bailarines?<br>👉 <em>Configura el Paso 3, genera el lienzo y pinta la fracción correspondiente.</em>",
+            descEn: "🍕 <strong>Chontaduro Pizzas in Cali</strong><br>A Cali pizzeria invented a round pizza flavored with chontaduro. They divide each pizza into <strong>5 equal portions</strong>. A group of salsa dancers consumes <strong>9 portions</strong> in total after rehearsal.<br><br><strong>Question:</strong> What fraction represents the dancers' consumption?<br>👉 <em>Configure Step 3, generate the canvas and paint the corresponding fraction.</em>"
+        },
+        {
+            shape: 'circular', den: 12, num: 7, qty: 1,
+            descEs: "🤠 <strong>Tejido del Sombrero Vueltiao</strong><br>Un artesano de Sampués teje la parte superior circular de un sombrero vueltiao dividiendo el diseño en <strong>12 sectores iguales</strong>. Decide pintar exactamente <strong>7 de estos sectores</strong> con fibra negra.<br><br><strong>Pregunta:</strong> ¿Qué fracción de este sombrero circular representará el patrón negro teñido?<br>👉 <em>Configura el Paso 3, genera el lienzo y pinta la fracción correspondiente.</em>",
+            descEn: "🤠 <strong>Sombrero Vueltiao Weaving</strong><br>An artisan from Sampués weaves the circular crown of a sombrero vueltiao, dividing the design into <strong>12 equal sectors</strong>. He decides to dye exactly <strong>7 of these sectors</strong> black.<br><br><strong>Question:</strong> What fraction of this circular hat will represent the dyed black pattern?<br>👉 <em>Configure Step 3, generate the canvas and paint the corresponding fraction.</em>"
+        },
+        {
+            shape: 'cuadrada', den: 10, num: 13, qty: 2,
+            descEs: "🥖 <strong>Bandejas de Achiras en Neiva</strong><br>Un panadero hornea deliciosas Achiras en bandejas cuadradas diseñadas para organizar la masa en <strong>10 filas iguales</strong>. Hoy preparó masa para llenar <strong>13 filas en total</strong>.<br><br><strong>Pregunta:</strong> ¿Qué fracción representa las bandejas de Achiras horneadas?<br>👉 <em>Configura el Paso 3, genera el lienzo y pinta la fracción correspondiente.</em>",
+            descEn: "🥖 <strong>Achiras Trays in Neiva</strong><br>A baker bakes delicious Achiras on square trays designed to organize dough into <strong>10 equal rows</strong>. Today he prepared dough to fill <strong>13 rows in total</strong>.<br><br><strong>Question:</strong> What fraction represents the baked Achiras trays?<br>👉 <em>Configure Step 3, generate the canvas and paint the corresponding fraction.</em>"
+        },
+        {
+            shape: 'cuadrada', den: 6, num: 11, qty: 2,
+            descEs: "🐝 <strong>Miel de la Sierra Nevada</strong><br>Apicultores de la Sierra Nevada usan cajas cuadradas de cría de abejas divididas en <strong>6 marcos de panal idénticos</strong>. Una colmena completó <strong>11 marcos llenos</strong> de pura miel.<br><br><strong>Pregunta:</strong> ¿Qué fracción representa el volumen de miel producido?<br>👉 <em>Configura el Paso 3, genera el lienzo y pinta la fracción correspondiente.</em>",
+            descEn: "🐝 <strong>Sierra Nevada Honey</strong><br>Beekeepers in the Sierra Nevada use square breeding boxes divided into <strong>6 identical comb frames</strong>. A hive completed <strong>11 full frames</strong> of pure honey.<br><br><strong>Question:</strong> What fraction represents the volume of honey produced?<br>👉 <em>Configure Step 3, generate the canvas and paint the corresponding fraction.</em>"
+        }
+    ];
+
+    let builderTask = {};
+    function newActivity() {
+        playSound('click');
+        const index = Math.floor(Math.random() * scenarios.length);
+        const task = scenarios[index];
+        builderTask = { ...task };
+        
+        document.getElementById('challenge-text').innerHTML = `<span class="tx" data-en="${task.descEn}" data-es="${task.descEs}">${isEnglish ? task.descEn : task.descEs}</span>`;
+        document.getElementById('shape-container').innerHTML = `<p style="opacity: 0.6; font-size: 20px; font-weight: bold;" class="tx" data-es="El lienzo está vacío. Configura el Paso 3 arriba y haz clic en Generar." data-en="The canvas is empty. Configure Step 3 above and click Generate.">El lienzo está vacío. Configura el Paso 3 arriba y haz clic en Generar.</p>`;
+        document.getElementById('builder-feedback').className = 'feedback';
+        
+        document.getElementById('build-shape').value = 'circular';
+        document.getElementById('build-qty').value = 1;
+        document.getElementById('build-den').value = 1;
+        document.getElementById('build-color').value = '#E31837';
+        
+        document.getElementById('struct-num').value = ""; 
+        document.getElementById('struct-den').value = "";
+        
+        document.querySelectorAll('.frac-slot').forEach(slot => {
+            slot.innerHTML = `<span style="opacity: 0.6;" class="tx" data-es="Arrastra aquí" data-en="Drag here">Arrastra aquí</span>`;
+            slot.classList.remove('filled');
+        });
+        document.querySelectorAll('.word-btn').forEach(btn => btn.style.display = 'inline-block');
+        
+        updateLanguageDOM();
+    }
+
+    function allowDrop(ev) { ev.preventDefault(); }
+    
+    function dragWord(ev) {
+        playSound('click');
+        ev.dataTransfer.setData("id", ev.target.id);
+        ev.dataTransfer.setData("type", ev.currentTarget.getAttribute('data-type'));
+    }
+    
+    function dropWord(ev) {
+        ev.preventDefault();
+        playSound('click');
+        let slot = ev.target.closest('.frac-slot');
+        let draggedId = ev.dataTransfer.getData("id");
+        let draggedType = ev.dataTransfer.getData("type");
+        
+        if(slot && slot.dataset.target === draggedType) {
+            let btn = document.getElementById(draggedId);
+            slot.innerHTML = `<span class="tx" style="font-size: 22px; width:100%; height:100%; display:flex; align-items:center; justify-content:center; text-align:center;" data-es="${btn.innerText}" data-en="${btn.innerText}">${btn.innerText}</span>`;
+            slot.classList.add('filled');
+            btn.style.display = 'none';
+            updateLanguageDOM();
+        } else {
+            playSound('error');
+        }
+    }
+
+    function assignWord(btn, type) {
+        playSound('click');
+        let target = document.querySelector(`.frac-slot[data-target="${type}"]`);
+        target.innerHTML = `<span class="tx" style="font-size: 22px; width:100%; height:100%; display:flex; align-items:center; justify-content:center; text-align:center;" data-es="${btn.innerText}" data-en="${btn.innerText}">${btn.innerText}</span>`;
+        target.classList.add('filled');
+        btn.style.display = 'none';
+        updateLanguageDOM();
+    }
+
+    function returnWord(slot, btnId) {
+        if(slot.classList.contains('filled')) {
+            playSound('click');
+            slot.innerHTML = `<span style="opacity: 0.6;" class="tx" data-es="Arrastra aquí" data-en="Drag here">Arrastra aquí</span>`;
+            slot.classList.remove('filled');
+            document.getElementById(btnId).style.display = 'inline-block';
+            updateLanguageDOM();
+        }
+    }
+
+    function generateShape() {
+        playSound('click');
+        const s = document.getElementById('build-shape').value;
+        const d = parseInt(document.getElementById('build-den').value);
+        const qty = parseInt(document.getElementById('build-qty').value);
+        const col = document.getElementById('build-color').value;
+        
+        if(d < 1 || qty < 1 || qty > 5) {
+            alert(isEnglish ? "Please select valid dimensions." : "Por favor selecciona dimensiones válidas.");
+            return;
+        }
+
+        const container = document.getElementById('shape-container');
+        container.innerHTML = '';
+
+        for (let fig = 0; fig < qty; fig++) {
+            let figBox = document.createElement('div');
+            figBox.style.width = '180px';
+            figBox.style.height = '180px';
+            figBox.style.position = 'relative';
+
+            let svgNS = "http://www.w3.org/2000/svg";
+            let svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("width", "100%");
+            svg.setAttribute("height", "100%");
+            svg.setAttribute("viewBox", "0 0 100 100");
+
+            if (s === 'circular') {
+                for (let i = 0; i < d; i++) {
+                    let path = document.createElementNS(svgNS, "path");
+                    let angle1 = (i * 360 / d) * Math.PI / 180;
+                    let angle2 = ((i + 1) * 360 / d) * Math.PI / 180;
+                    let x1 = 50 + 45 * Math.cos(angle1);
+                    let y1 = 50 + 45 * Math.sin(angle1);
+                    let x2 = 50 + 45 * Math.cos(angle2);
+                    let y2 = 50 + 45 * Math.sin(angle2);
+                    
+                    let dAttr = `M 50 50 L ${x1} ${y1} A 45 45 0 ${ (360/d) > 180 ? 1 : 0 } 1 ${x2} ${y2} Z`;
+                    path.setAttribute("d", dAttr);
+                    path.setAttribute("fill", "var(--surface)");
+                    path.setAttribute("stroke", "var(--secondary)");
+                    path.setAttribute("stroke-width", "1.5");
+                    path.setAttribute("class", "canvas-slice");
+                    path.style.cursor = 'pointer';
+                    path.style.transition = 'fill 0.3s';
+                    path.onclick = function() {
+                        playSound('click');
+                        this.classList.toggle('active');
+                        if (this.classList.contains('active')) {
+                            this.setAttribute("fill", col);
+                        } else {
+                            this.setAttribute("fill", "var(--surface)");
+                        }
+                    };
+                    svg.appendChild(path);
+                }
+            } else {
+                // Diseño de división de rebanadas cuadradas
+                const rows = Math.ceil(Math.sqrt(d));
+                const cols = Math.ceil(d / rows);
+                const w = 90 / cols;
+                const h = 90 / rows;
+                let count = 0;
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        if (count >= d) break;
+                        let rect = document.createElementNS(svgNS, "rect");
+                        rect.setAttribute("x", 5 + c * w);
+                        rect.setAttribute("y", 5 + r * h);
+                        rect.setAttribute("width", w - 1);
+                        rect.setAttribute("height", h - 1);
+                        rect.setAttribute("fill", "var(--surface)");
+                        rect.setAttribute("stroke", "var(--secondary)");
+                        rect.setAttribute("stroke-width", "1.5");
+                        rect.setAttribute("class", "canvas-slice");
+                        rect.style.cursor = 'pointer';
+                        rect.style.transition = 'fill 0.3s';
+                        rect.onclick = function() {
+                            playSound('click');
+                            this.classList.toggle('active');
+                            if (this.classList.contains('active')) {
+                                this.setAttribute("fill", col);
+                            } else {
+                                this.setAttribute("fill", "var(--surface)");
+                            }
+                        };
+                        svg.appendChild(rect);
+                        count++;
+                    }
+                }
+            }
+            figBox.appendChild(svg);
+            container.appendChild(figBox);
+        }
+    }
+
+    // AJUSTE 2: Comprobación del taller guiado, sin revelación de respuestas
+    function checkBuilder() {
+        // Evaluar ranuras para palabras de estructura
+        const slotNum = document.querySelector('.frac-slot[data-target="num"]').classList.contains('filled');
+        const slotBar = document.querySelector('.frac-slot[data-target="bar"]').classList.contains('filled');
+        const slotDen = document.querySelector('.frac-slot[data-target="den"]').classList.contains('filled');
+        const wordArrangementOk = slotNum && slotBar && slotDen;
+
+        const valNum = parseInt(document.getElementById('struct-num').value);
+        const valDen = parseInt(document.getElementById('struct-den').value);
+        const numsMatchText = (valNum === builderTask.num && valDen === builderTask.den);
+
+        const configShape = document.getElementById('build-shape').value;
+        const configQty = parseInt(document.getElementById('build-qty').value);
+        const configDen = parseInt(document.getElementById('build-den').value);
+        const configMatchesChallenge = (configShape === builderTask.shape && configQty === builderTask.qty && configDen === builderTask.den);
+
+        let activeSlicesCount = 0;
+        document.querySelectorAll('.canvas-slice.active').forEach(el => activeSlicesCount++);
+        const paintedSlicesMatchChallenge = (activeSlicesCount === builderTask.num);
+
+        let issues = [];
+        if (!wordArrangementOk) issues.push(isEnglish ? "Labels in Step 2" : "Asignación de etiquetas en el Paso 2");
+        if (!numsMatchText) issues.push(isEnglish ? "Numbers in Step 2" : "Números del Paso 2");
+        if (!configMatchesChallenge) issues.push(isEnglish ? "Canvas parameters in Step 3" : "Parámetros del lienzo en el Paso 3");
+        if (!paintedSlicesMatchChallenge) issues.push(isEnglish ? "Amount of painted portions" : "Cantidad de porciones pintadas en la figura");
+
+        let score = 4 - issues.length;
+
+        if (issues.length === 0) {
+            showFeedback('builder-feedback', true,
+                "¡Increíble! Lograste configurar la fracción y colorearla a la perfección. Has completado el taller del arquitecto.",
+                "Incredible! You configured the fraction and colored it perfectly. You completed the architect workshop."
+            );
+            document.getElementById('btn-finish-tab2').style.display = 'inline-block';
+            showVictoryModal("¡Taller Completado!", "Workshop Completed!");
+        } else {
+            let esMsg = `Revisa los siguientes puntos corregibles: <strong>${issues.join(", ")}</strong>.<br>Consejo: La forma y cantidad de divisiones en el lienzo deben acoplarse con la arepa, achira o bocadillo del Paso 1. Puntaje actual: ${score}/4.`;
+            let enMsg = `Please review and correct: <strong>${issues.join(", ")}</strong>.<br>Advice: The shape and division parameters in Step 3 must fit the arepa, achira or bocadillo described in Step 1. Score: ${score}/4.`;
+            showFeedback('builder-feedback', false, esMsg, enMsg);
+        }
+    }
+
+    // --- PESTAÑA 3 (Fauna Colombiana) ---
+    let matchedNodes = {};
+    let activeNode = null;
+
+    function selectNode(btn) {
+        playSound('click');
+        if (btn.hasAttribute('data-id')) {
+            if (activeNode) activeNode.classList.remove('active');
+            activeNode = btn;
+            btn.classList.add('active');
+        } else if (btn.hasAttribute('data-match') && activeNode) {
+            const m = btn.getAttribute('data-match');
+            const id = activeNode.getAttribute('data-id');
+            if (m === id) {
+                matchedNodes[id] = true;
+                activeNode.classList.add('matched');
+                activeNode.classList.remove('active');
+                btn.classList.add('matched');
+                activeNode = null;
+                drawConnectingLines();
+            } else {
+                playSound('error');
+                activeNode.classList.remove('active');
+                activeNode = null;
+            }
+        }
+    }
+
+    function drawConnectingLines() {
+        const svg = document.getElementById('cg-lines');
+        svg.innerHTML = '';
+        const rectSvg = svg.getBoundingClientRect();
+        
+        for (let key in matchedNodes) {
+            const left = document.querySelector(`.cg-node[data-id="${key}"]`);
+            const right = document.querySelector(`.cg-node[data-match="${key}"]`);
+            if (left && right) {
+                const rL = left.getBoundingClientRect();
+                const rR = right.getBoundingClientRect();
+                let x1 = rL.right - rectSvg.left;
+                let y1 = (rL.top + rL.height/2) - rectSvg.top;
+                let x2 = rR.left - rectSvg.left;
+                let y2 = (rR.top + rR.height/2) - rectSvg.top;
+
+                let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+                line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+                line.setAttribute('stroke', 'var(--success)');
+                line.setAttribute('stroke-width', '4');
+                svg.appendChild(line);
+            }
+        }
+    }
+    window.addEventListener('resize', drawConnectingLines);
+
+    function setTF(btn, val, parentId) {
+        playSound('click');
+        document.querySelectorAll(`#${parentId} .tf-btn`).forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        let valToStore = val ? 'true' : 'false';
+        if (parentId === 't3-tf2') document.getElementById('ans-t3-a2').value = valToStore;
+        if (parentId === 't3-tf4') document.getElementById('ans-t3-a4').value = valToStore;
+        if (parentId === 't4-tf3') document.getElementById('ans-t4-a3').value = valToStore;
+        if (parentId === 't4-tf4') document.getElementById('ans-t4-a4').value = valToStore;
+        if (parentId === 't5-tf4') document.getElementById('ans-t5-a4').value = valToStore;
+    }
+
+    function moveUp(btn) {
+        playSound('click');
+        let li = btn.closest('li');
+        let prev = li.previousElementSibling;
+        if (prev) li.parentNode.insertBefore(li, prev);
+    }
+    function moveDown(btn) {
+        playSound('click');
+        let li = btn.closest('li');
+        let next = li.nextElementSibling;
+        if (next) li.parentNode.insertBefore(next, li);
+    }
+
+    // AJUSTE 2: Comprobación de fauna guiada, sin revelación de respuestas
+    function checkTab3() {
+        let score = 0;
+        let incorrectItems = [];
+
+        // Comprobar Q1
+        const q1Ok = (matchedNodes['3/8'] && matchedNodes['8/5']);
+        if (q1Ok) score++; else incorrectItems.push(isEnglish ? "1. The Jaguar Rescue (Matches)" : "1. El Rescate del Jaguar (Conexión)");
+
+        // Comprobar Q2
+        const q2Ok = (document.getElementById('ans-t3-a2').value === 'false');
+        if (q2Ok) score++; else incorrectItems.push(isEnglish ? "2. Jumping Frogs of Chocó" : "2. Las Ranas Saltarinas del Chocó");
+
+        // Comprobar Q3
+        let list1 = document.getElementById('sort-list-1');
+        let items1 = Array.from(list1.getElementsByTagName('li'));
+        let order1 = items1.map(li => li.getAttribute('data-val')).join('');
+        const q3Ok = (order1 === "123");
+        if (q3Ok) score++; else incorrectItems.push(isEnglish ? "3. Macaw Flight (Sorting)" : "3. El Vuelo de las Guacamayas (Ordenar)");
+
+        // Comprobar Q4
+        const q4Ok = (document.getElementById('ans-t3-a4').value === 'true');
+        if (q4Ok) score++; else incorrectItems.push(isEnglish ? "4. Spectacled Bear Banquet" : "4. El Banquete del Oso de Anteojos");
+
+        // Comprobar Q5
+        let n5 = parseInt(document.getElementById('t3-n5').value);
+        let d5 = parseInt(document.getElementById('t3-d5').value);
+        const q5Ok = (n5 === 6 && d5 === 15);
+        if (q5Ok) score++; else incorrectItems.push(isEnglish ? "5. Sightings in the Páramo (Sliders)" : "5. Avistamiento en el Páramo (Deslizadores)");
+
+        const fb = document.getElementById('fb-tab3');
+        if (score === 5) {
+            showFeedback('fb-tab3', true, 
+                "¡Excelente! Superaste todos los desafíos de la Expedición Animal. Has obtenido el código secreto.", 
+                "Excellent! You conquered all challenges of the Animal Expedition. You unlocked the secret code!"
+            );
+            document.getElementById('btn-code3').style.display = 'inline-block';
+            showVictoryModal("¡Felicidades, código desbloqueado!", "Congratulations, code unlocked!");
+        } else {
+            let esMsg = `Puntaje: ${score}/5. Debes corregir los siguientes puntos: <br><strong>- ${incorrectItems.join("<br>- ")}</strong>.<br>Consejo: Las fracciones impropias tienen el numerador más grande, y las homogéneas conservan el denominador.`;
+            let enMsg = `Score: ${score}/5. You must correct the following points: <br><strong>- ${incorrectItems.join("<br>- ")}</strong>.<br>Advice: Improper fractions have a larger numerator, and homogeneous fractions preserve the denominator.`;
+            fb.innerHTML = isEnglish ? enMsg : esMsg;
+            fb.className = "feedback show incorrect";
+            playSound('error');
+        }
+    }
+
+    // --- PESTAÑA 4 (Cocina de Arepas) ---
+    function drawArepas() {
+        const createArepa = (elementId, startIdx) => {
+            const wrapper = document.getElementById(elementId);
+            wrapper.innerHTML = '';
+            let svgNS = "http://www.w3.org/2000/svg";
+            let svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("width", "85");
+            svg.setAttribute("height", "85");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            
+            for (let i = 0; i < 4; i++) {
+                let path = document.createElementNS(svgNS, "path");
+                let angle1 = (i * 90) * Math.PI / 180;
+                let angle2 = ((i + 1) * 90) * Math.PI / 180;
+                let x1 = 50 + 45 * Math.cos(angle1);
+                let y1 = 50 + 45 * Math.sin(angle1);
+                let x2 = 50 + 45 * Math.cos(angle2);
+                let y2 = 50 + 45 * Math.sin(angle2);
+                
+                let dAttr = `M 50 50 L ${x1} ${y1} A 45 45 0 0 1 ${x2} ${y2} Z`;
+                path.setAttribute("d", dAttr);
+                path.setAttribute("fill", "var(--surface)");
+                path.setAttribute("stroke", "var(--secondary)");
+                path.setAttribute("stroke-width", "2");
+                path.setAttribute("class", "arepa-slice");
+                path.style.cursor = 'pointer';
+                path.style.transition = 'fill 0.2s';
+                path.onclick = function() {
+                    playSound('click');
+                    this.classList.toggle('active');
+                    if (this.classList.contains('active')) {
+                        this.setAttribute("fill", "#FFC107");
+                    } else {
+                        this.setAttribute("fill", "var(--surface)");
+                    }
+                };
+                svg.appendChild(path);
+            }
+            wrapper.appendChild(svg);
+        };
+        createArepa('arepa1', 0);
+        createArepa('arepa2', 4);
+        createArepa('arepa3', 8);
+    }
+
+    function generateFlan() {
+        playSound('click');
+        const div = parseInt(document.getElementById('t4-flan-div').value);
+        const container = document.getElementById('flan-container');
+        container.innerHTML = '';
+        
+        if (div < 1 || div > 10) {
+            alert(isEnglish ? "Min divisions: 1, Max: 10" : "Mínimo divisiones: 1, Máximo: 10");
+            return;
+        }
+        for (let i = 0; i < div; i++) {
+            let slice = document.createElement('div');
+            slice.className = 'slice-flan';
+            slice.style.flex = "1";
+            slice.style.height = "100%";
+            slice.style.border = "1.5px solid #d35400";
+            slice.style.background = "var(--surface)";
+            slice.style.cursor = "pointer";
+            slice.onclick = function() {
+                playSound('click');
+                this.classList.toggle('active');
+                if(this.classList.contains('active')) {
+                    this.style.background = "#e67e22";
+                } else {
+                    this.style.background = "var(--surface)";
+                }
+            };
+            container.appendChild(slice);
+        }
+    }
+
+    // AJUSTE 2: Comprobación de arepas guiadas, sin revelación de respuestas
+    function checkTab4() {
+        let score = 0;
+        let incorrectItems = [];
+
+        // Comprobar Q1: Partes de arepa (Debe colorear exactamente 9 partes en total)
+        let totalArepaSlices = 0;
+        document.querySelectorAll('.arepa-slice.active').forEach(() => totalArepaSlices++);
+        if (totalArepaSlices === 9) score++; else incorrectItems.push(isEnglish ? "1. Family Breakfast (Coloured pieces)" : "1. Desayuno Familiar (Porciones pintadas)");
+
+        // Comprobar Q2: Leche (5/2 -> 2 enteros, 1/2)
+        const e = parseInt(document.getElementById('t4-e2').value);
+        const n = parseInt(document.getElementById('t4-n2').value);
+        const d = parseInt(document.getElementById('t4-d2').value);
+        if (e === 2 && n === 1 && d === 2) score++; else incorrectItems.push(isEnglish ? "2. Milk for the Chocolate (Mixed structure)" : "2. Leche para el Chocolate (Estructura mixta)");
+
+        // Comprobar Q3: 6/4 impropia
+        if (document.getElementById('ans-t4-a3').value === 'false') score++; else incorrectItems.push(isEnglish ? "3. Double Cheese Portion (Classification)" : "3. Doble Porción de Queso (Clasificación)");
+
+        // Comprobar Q4: Equivalencia de mantequilla
+        if (document.getElementById('ans-t4-a4').value === 'true') score++; else incorrectItems.push(isEnglish ? "4. Equivalent Butter" : "4. Mantequilla Equivalente");
+
+        // Comprobar Q5: Flan (4 div, 1 activo)
+        let div = parseInt(document.getElementById('t4-flan-div').value);
+        let flanActive = 0;
+        document.querySelectorAll('.slice-flan.active').forEach(() => flanActive++);
+        if (div === 4 && flanActive === 1) score++; else incorrectItems.push(isEnglish ? "5. Sharing Dessert (Caramel flan config)" : "5. Compartiendo el Postre (Configuración del flan)");
+
+        const fb = document.getElementById('fb-tab4');
+        if (score === 5) {
+            showFeedback('fb-tab4', true,
+                "¡Excelente trabajo chef! Has completado el reto gastronómico colombiano correctamente.",
+                "Excellent chef! You completed the Colombian gastronomic challenge perfectly."
+            );
+            document.getElementById('btn-code4').style.display = 'inline-block';
+            showVictoryModal("¡Cocina dominada!", "Kitchen conquered!");
+        } else {
+            let esMsg = `Puntaje obtenido: ${score}/5. Debes corregir las siguientes secciones: <br><strong>- ${incorrectItems.join("<br>- ")}</strong>.<br>Consejo: Un número mixto se descompone dividiendo el numerador entre el denominador. ¡Revisa la leche y las porciones!`;
+            let enMsg = `Score obtained: ${score}/5. You must correct the following sections: <br><strong>- ${incorrectItems.join("<br>- ")}</strong>.<br>Advice: A mixed number is solved by dividing the numerator by the denominator. Check the milk and slices!`;
+            fb.innerHTML = isEnglish ? enMsg : esMsg;
+            fb.className = "feedback show incorrect";
+            playSound('error');
+        }
+    }
+
+    // --- PESTAÑA 5 (Escarabajos) ---
+    function updateSimp() {
+        const val = parseInt(document.getElementById('t5-slider').value);
+        const display = document.getElementById('simp-display');
+        if (val === 1) display.innerText = "8 / 16";
+        if (val === 2) display.innerText = "4 / 8";
+        if (val === 3) display.innerText = "2 / 4";
+        if (val === 4) display.innerText = "1 / 2";
+    }
+
+    // AJUSTE 2: Comprobación de ciclistas guiados, sin revelación de respuestas
+    function checkTab5() {
+        let score = 0;
+        let incorrectItems = [];
+
+        // Comprobar Q1: Simplificar
+        if (parseInt(document.getElementById('t5-slider').value) === 4) score++; else incorrectItems.push(isEnglish ? "1. Simplify the Route" : "1. Simplificar la Ruta");
+
+        // Comprobar Q2: Mixto 13/5 -> 2 enteros, 3/5
+        const e = parseInt(document.getElementById('t5-e2').value);
+        const n = parseInt(document.getElementById('t5-n2').value);
+        const d = parseInt(document.getElementById('t5-d2').value);
+        if (e === 2 && n === 3 && d === 5) score++; else incorrectItems.push(isEnglish ? "2. Velocity in the Páramo" : "2. Velocidad en el Páramo");
+
+        // Comprobar Q3: Clasificación
+        let list2 = document.getElementById('sort-list-2');
+        let items2 = Array.from(list2.getElementsByTagName('li'));
+        let order2 = items2.map(li => li.getAttribute('data-val')).join('');
+        if (order2 === "123") score++; else incorrectItems.push(isEnglish ? "3. Strategic Hydration" : "3. Hidratación Estratégica");
+
+        // Comprobar Q4: Comparación de pendientes
+        if (document.getElementById('ans-t5-a4').value === 'true') score++; else incorrectItems.push(isEnglish ? "4. Comparing Slopes" : "4. Comparando Pendientes");
+
+        // Comprobar Q5: Suma 2/10 + 5/10 = 7/10
+        const n5 = parseInt(document.getElementById('t5-n5').value);
+        const d5 = parseInt(document.getElementById('t5-d5').value);
+        if (n5 === 7 && d5 === 10) score++; else incorrectItems.push(isEnglish ? "5. The Final Descent" : "5. El Descenso Final");
+
+        // Comprobar Q6: MCM 4 y 8 -> 8
+        if (parseInt(document.getElementById('t5-q6').value) === 8) score++; else incorrectItems.push(isEnglish ? "6. Nairo's Sprint" : "6. El Sprint de Nairo");
+
+        const fb = document.getElementById('fb-tab5');
+        if (score >= 4) {
+            showFeedback('fb-tab5', true,
+                `¡Excelente! Cruzaste la meta del ciclismo colombiano con un gran desempeño. Puntaje total: ${score}/6.`,
+                `Excellent! You crossed the finish line of Colombian cycling with high performance. Total score: ${score}/6.`
+            );
+            document.getElementById('btn-code5').style.display = 'inline-block';
+            showVictoryModal("¡Campeón de la Montaña!", "Mountain Champion!");
+        } else {
+            let esMsg = `Puntaje: ${score}/6 (Necesitas mínimo 4 para desbloquear). Debes corregir: <br><strong>- ${incorrectItems.join("<br>- ")}</strong>.<br>Consejo: El mínimo común múltiplo es el menor número múltiplo de ambos denominadores.`;
+            let enMsg = `Score: ${score}/6 (You need at least 4 to unlock). You must correct: <br><strong>- ${incorrectItems.join("<br>- ")}</strong>.<br>Advice: The least common multiple is the smallest positive integer that is a multiple of both numbers.`;
+            fb.innerHTML = isEnglish ? enMsg : esMsg;
+            fb.className = "feedback show incorrect";
+            playSound('error');
+        }
+    }
+
+    // --- PESTAÑA 6 (Evaluación / Conclusiones) ---
+    const quizQuestions = [
+        {
+            qEs: "1. ¿Qué tipo de fracción es 4/3?",
+            qEn: "1. What type of fraction is 4/3?",
+            optsEs: ["A) Fracción Impropia", "B) Fracción Propia", "C) Número Mixto"],
+            optsEn: ["A) Improper Fraction", "B) Proper Fraction", "C) Mixed Number"],
+            ans: 0,
+            tipEs: "Una fracción impropia tiene el numerador mayor o igual que el denominador.",
+            tipEn: "An improper fraction has a numerator greater than or equal to the denominator."
+        },
+        {
+            qEs: "2. Si una arepa se corta en 8 partes y te comes 3, ¿qué fracción queda?",
+            qEn: "2. If an arepa is cut into 8 parts and you eat 3, what fraction is left?",
+            optsEs: ["A) 5/8", "B) 3/8", "C) 8/3"],
+            optsEn: ["A) 5/8", "B) 3/8", "C) 8/3"],
+            ans: 0,
+            tipEs: "Resta las partes que te comiste del total original de porciones.",
+            tipEn: "Subtract the eaten parts from the original total amount of slices."
+        },
+        {
+            qEs: "3. ¿Cuál de las siguientes es equivalente a 1/3?",
+            qEn: "3. Which of the following is equivalent to 1/3?",
+            optsEs: ["A) 2/6", "B) 2/4", "C) 3/6"],
+            optsEn: ["A) 2/6", "B) 2/4", "C) 3/6"],
+            ans: 0,
+            tipEs: "Multiplica o divide numerador y denominador por el mismo número para hallar equivalencias.",
+            tipEn: "Multiply or divide both numerator and denominator by the same number to check equivalence."
+        },
+        {
+            qEs: "4. ¿Cómo se expresa 7/4 como un número mixto?",
+            qEn: "4. How is 7/4 expressed as a mixed number?",
+            optsEs: ["A) 1 y 3/4", "B) 2 y 1/4", "C) 1 y 1/4"],
+            optsEn: ["A) 1 and 3/4", "B) 2 and 1/4", "C) 1 and 1/4"],
+            ans: 0,
+            tipEs: "Divide 7 entre 4: el cociente es el entero, y el residuo va en el numerador.",
+            tipEn: "Divide 7 by 4: the quotient is the integer, and the remainder is the numerator."
+        },
+        {
+            qEs: "5. ¿Cuál es el resultado de sumar 2/7 + 3/7?",
+            qEn: "5. What is the result of adding 2/7 + 3/7?",
+            optsEs: ["A) 5/7", "B) 5/14", "C) 1/7"],
+            optsEn: ["A) 5/7", "B) 5/14", "C) 1/7"],
+            ans: 0,
+            tipEs: "En suma homogénea, suma únicamente los numeradores y mantén el denominador intacto.",
+            tipEn: "In homogeneous sum, add only the numerators and keep the denominator."
+        },
+        {
+            qEs: "6. ¿Qué es 6/18 simplificado a su mínima expresión?",
+            qEn: "6. What is 6/18 simplified to its simplest form?",
+            optsEs: ["A) 1/3", "B) 1/2", "C) 2/6"],
+            optsEn: ["A) 1/3", "B) 1/2", "C) 2/6"],
+            ans: 0,
+            tipEs: "Divide ambos números por su máximo común divisor (6) para simplificar.",
+            tipEn: "Divide both values by their greatest common divisor (6) to simplify."
+        },
+        {
+            qEs: "7. En una fracción propia, el numerador es siempre...",
+            qEn: "7. In a proper fraction, the numerator is always...",
+            optsEs: ["A) Menor que el denominador", "B) Mayor que el denominador", "C) Igual al denominador"],
+            optsEn: ["A) Smaller than the denominator", "B) Greater than the denominator", "C) Equal to the denominator"],
+            ans: 0,
+            tipEs: "Las fracciones propias representan partes más pequeñas que el objeto entero.",
+            tipEn: "Proper fractions represent sizes smaller than one whole object."
+        },
+        {
+            qEs: "8. ¿Por qué el denominador no puede ser cero?",
+            qEn: "8. Why can't a denominator be zero?",
+            optsEs: ["A) No puedes dividir algo en cero partes", "B) El cero no es un número", "C) La respuesta es infinita"],
+            optsEn: ["A) You cannot divide something into zero parts", "B) Zero is not a number", "C) The answer is infinite"],
+            ans: 0,
+            tipEs: "El denominador indica en cuántas partes divides el entero. Dividir entre 0 físicamente no existe.",
+            tipEn: "The denominator indicates the total splits. Dividing by zero is physically undefined."
+        },
+        {
+            qEs: "9. En la Sierra Nevada, se recolectaron 10 cajas de miel, de las cuales 4 eran de flores silvestres. ¿Qué fracción representan?",
+            qEn: "9. In the Sierra Nevada, 10 honey boxes were harvested, 4 of which were wildflower honey. What fraction do they represent?",
+            optsEs: ["A) 4/10", "B) 10/4", "C) 6/10"],
+            optsEn: ["A) 4/10", "B) 10/4", "C) 6/10"],
+            ans: 0,
+            tipEs: "El numerador registra el grupo de interés (4), y el denominador el universo de datos (10).",
+            tipEn: "The numerator tracks the interest group (4), and the denominator shows the total universe (10)."
+        },
+        {
+            qEs: "10. Convierte el número mixto 3 y 1/2 a fracción impropia.",
+            qEn: "10. Convert the mixed number 3 and 1/2 into an improper fraction.",
+            optsEs: ["A) 7/2", "B) 5/2", "C) 6/2"],
+            optsEn: ["A) 7/2", "B) 5/2", "C) 6/2"],
+            ans: 0,
+            tipEs: "Multiplica el entero por el denominador y súmale el numerador: (3 * 2) + 1.",
+            tipEn: "Multiply the integer by the denominator and add the numerator: (3 * 2) + 1."
+        },
+        {
+            qEs: "11. ¿Qué fracción es mayor: 3/5 o 4/5?",
+            qEn: "11. Which fraction is greater: 3/5 or 4/5?",
+            optsEs: ["A) 4/5", "B) 3/5", "C) Son iguales"],
+            optsEn: ["A) 4/5", "B) 3/5", "C) They are equal"],
+            ans: 0,
+            tipEs: "Cuando los denominadores coinciden, el numerador de mayor valor indica la mayor fracción.",
+            tipEn: "When denominators are equal, the higher numerator dictates the greater value."
+        },
+        {
+            qEs: "12. Para sumar 1/2 y 1/4, ¿qué denominador común se recomienda usar?",
+            qEn: "12. To add 1/2 and 1/4, what common denominator is recommended to use?",
+            optsEs: ["A) 4", "B) 2", "C) 8"],
+            optsEn: ["A) 4", "B) 2", "C) 8"],
+            ans: 0,
+            tipEs: "Calcula el Mínimo Común Múltiplo (MCM) entre 2 y 4 para unificar la base.",
+            tipEn: "Calculate the Least Common Multiple (LCM) between 2 and 4 to unify the base."
+        }
+    ];
+
+    function buildQuiz() {
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = '';
+        
+        quizQuestions.forEach((q, idx) => {
+            let box = document.createElement('div');
+            box.className = 'masonry-item activity-box';
+            
+            let h4 = document.createElement('h4');
+            h4.innerText = isEnglish ? q.qEn : q.qEs;
+            box.appendChild(h4);
+            
+            const opts = isEnglish ? q.optsEn : q.optsEs;
+            opts.forEach((o, oIdx) => {
+                let div = document.createElement('div');
+                div.style.margin = "10px 0";
+                div.style.textAlign = "left";
+                
+                let input = document.createElement('input');
+                input.type = 'radio';
+                input.name = `q${idx}`;
+                input.value = oIdx;
+                input.id = `q${idx}_o${oIdx}`;
+                input.style.transform = "scale(1.2)";
+                input.style.marginRight = "10px";
+                input.style.cursor = "pointer";
+                
+                let label = document.createElement('label');
+                label.htmlFor = `q${idx}_o${oIdx}`;
+                label.innerText = o;
+                label.style.cursor = "pointer";
+                label.style.fontSize = "17px";
+                
+                div.appendChild(input);
+                div.appendChild(label);
+                box.appendChild(div);
+            });
+            container.appendChild(box);
+        });
+    }
+
+    // AJUSTE 2: Comprobación del examen final guiado, sin revelación de respuestas
+    function calculateQuiz() {
+        let score = 0;
+        let incorrectQuestions = [];
+
+        quizQuestions.forEach((q, idx) => {
+            let selected = document.querySelector(`input[name="q${idx}"]:checked`);
+            if (selected && parseInt(selected.value) === q.ans) {
+                score++;
+            } else {
+                incorrectQuestions.push(idx + 1);
+            }
+        });
+
+        const resultLabel = document.getElementById('quiz-result');
+        const pie = document.getElementById('pie-chart');
+        
+        // Render pie progress
+        pie.style.display = 'block';
+        const percent = Math.round((score / 12) * 100);
+        pie.style.background = `conic-gradient(var(--success) 0% ${percent}%, var(--accent) ${percent}% 100%)`;
+
+        if (score === 12) {
+            resultLabel.style.color = "var(--success)";
+            resultLabel.innerHTML = isEnglish ?
+                `🎉 ¡Puntaje Perfecto! 12/12 (${percent}%). ¡Eres el maestro de las fracciones en Colombia!` :
+                `🎉 ¡Puntaje Perfecto! 12/12 (${percent}%). ¡Eres el maestro de las fracciones en Colombia!`;
+            showVictoryModal("¡Examen perfecto!", "Perfect Exam!");
+            document.getElementById('visual-summary').style.display = 'block';
+        } else {
+            resultLabel.style.color = "var(--accent)";
+            
+            // Crea consejos guiados para elementos incorrectos dinámicamente sin revelar opciones
+            let adviceHTML = incorrectQuestions.map(num => {
+                const item = quizQuestions[num - 1];
+                const tipText = isEnglish ? item.tipEn : item.tipEs;
+                return `<li><strong>Q${num}:</strong> ${tipText}</li>`;
+            }).join("");
+
+            let esMsg = `Examen Calificado: ${score}/12 de respuestas correctas. <br>
+                <span style="font-size:18px; font-weight:normal; color:var(--text); display:block; margin-top:15px; text-align:left;">
+                    Por favor revisa y corrige las siguientes preguntas: <strong>${incorrectQuestions.join(", ")}</strong>.<br>
+                    <ul style="margin-top:10px; padding-left:20px;">${adviceHTML}</ul>
+                </span>`;
+            let enMsg = `Examen Calificado: ${score}/12 correct answers. <br>
+                <span style="font-size:18px; font-weight:normal; color:var(--text); display:block; margin-top:15px; text-align:left;">
+                    Por favor revisa y corrige las siguientes preguntas: <strong>${incorrectQuestions.join(", ")}</strong>.<br>
+                    <ul style="margin-top:10px; padding-left:20px;">${adviceHTML}</ul>
+                </span>`;
+            
+            resultLabel.innerHTML = isEnglish ? enMsg : esMsg;
+            playSound('error');
+        }
+    }
+
+    // --- INICIALIZACIÓN DE CARGA DE VENTANA ---
+    window.onload = () => {
+        initWordSearch();
+        initRiddle();
+        newActivity();
+        drawArepas();
+        generateFlan();
+        buildQuiz();
+        updateLanguageDOM(); // Asegúrate de que la carga predeterminada coincida con el idioma elegido (inglés)
+    };
+</script>
+</body>
+</html>
