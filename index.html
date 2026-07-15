@@ -329,7 +329,9 @@
         <div class="activity-box" style="border: 2px solid var(--primary);">
             <h3 style="color: var(--highlight);">🔑 <span class="tx" data-es="Actividad 2: El Acertijo del Guardián" data-en="Activity 2: The Guardian's Riddle">Actividad 2: El Acertijo del Guardián</span></h3>
             
-            <!-- 1. PREGUNTA Y CAMPOS DE NÚMEROS -->
+            <!-- INTERACTIVE RIDDLE PICTURES (Requested Adjustment 1) -->
+            <div id="riddle-visual-container" style="display: flex; justify-content: center; align-items: center; margin-bottom: 15px; min-height: 140px; background: rgba(0,0,0,0.03); border-radius: 15px; border: 2px dashed var(--border); padding: 10px;"></div>
+            
             <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
                 <p id="logic-question" style="font-size: 19px; font-style: italic; min-height: 110px; text-align: left; border-left: 5px solid var(--primary); padding-left: 15px; line-height: 1.5;"></p>
                 <div style="display: flex; align-items: center; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
@@ -344,14 +346,7 @@
                     </div>
                 </div>
             </div>
-
-            <!-- 2. BOTÓN DE REVISAR -->
-            <button class="btn-3d" style="background: var(--success); color: white; width: 100%; margin-bottom: 20px;" onclick="checkLogicPuzzle()">✅ <span class="tx" data-es="Revisar Acertijo" data-en="Check Riddle">Revisar Acertijo</span></button>
-
-            <!-- 3. FIGURA INTERACTIVA (Desplazada debajo del botón según lo solicitado) -->
-            <div id="riddle-visual-container" style="display: flex; justify-content: center; align-items: center; margin-bottom: 15px; min-height: 140px; background: rgba(0,0,0,0.03); border-radius: 15px; border: 2px dashed var(--border); padding: 10px;"></div>
-            
-            <!-- 4. FEEDBACK Y CÓDIGO -->
+            <button class="btn-3d" style="background: var(--success); color: white; width: 100%;" onclick="checkLogicPuzzle()">✅ <span class="tx" data-es="Revisar Acertijo" data-en="Check Riddle">Revisar Acertijo</span></button>
             <span id="logic-feedback" class="feedback"></span>
             <div id="code-tab1" class="code-reveal"><span class="tx" data-es="Código Desbloqueado:" data-en="Unlocked Code:">Código Desbloqueado:</span> 1234</div>
             
@@ -365,6 +360,8 @@
                 <span class="tx" data-es="¿Están listos para descubrir cómo las matemáticas moldean el mundo que nos rodea? Resuelvan los acertijos para avanzar." data-en="Are you ready to discover how math shapes the world around us? Solve the puzzles to advance.">¿Están listos para descubrir cómo las matemáticas moldean el mundo que nos rodea? Resuelvan los acertijos para avanzar.</span>
             </div>
         </div>
+    </div>
+</div>
 
 <!-- PESTAÑA 2: El Taller del Creador -->
 <div id="tab2" class="tab-content">
