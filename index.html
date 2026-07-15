@@ -1303,7 +1303,6 @@
     
     container.innerHTML = '';
     
-    // Si manejas una variable global para contar los pedazos seleccionados, se reinicia aquí:
     if(typeof window.tab2SelectedSlices !== 'undefined') window.tab2SelectedSlices = 0;
 
     for (let i = 0; i < qty; i++) {
@@ -1316,8 +1315,6 @@
         svg.style.filter = "drop-shadow(2px 4px 6px rgba(0,0,0,0.1))";
 
         if (shape === 'circular') {
-            
-            // --- CORRECCIÓN: Si la división es 1 (Un entero completo) ---
             if (den === 1) {
                 let circle = document.createElementNS(svgNS, "circle");
                 circle.setAttribute("cx", "100");
@@ -1338,12 +1335,9 @@
                     }
                 };
                 svg.appendChild(circle);
-                
             } else {
-                // --- LÓGICA ORIGINAL: Para múltiples divisiones (Arcos) ---
                 for (let j = 0; j < den; j++) {
                     let path = document.createElementNS(svgNS, "path");
-                    // Ajuste de ángulos para que empiece desde arriba (-90 grados)
                     let startAngle = (j * 360 / den - 90) * (Math.PI / 180);
                     let endAngle = ((j + 1) * 360 / den - 90) * (Math.PI / 180);
                     
@@ -1374,7 +1368,6 @@
                 }
             }
         } else if (shape === 'cuadrada') {
-            // --- LÓGICA PARA FORMAS CUADRADAS ---
             let cols = Math.ceil(Math.sqrt(den));
             let rows = Math.ceil(den / cols);
             let w = 180 / cols;
