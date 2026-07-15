@@ -326,40 +326,40 @@
             <span id="ws-feedback" class="feedback"></span>
         </div>
 
-        <div class="activity-box" style="border: 2px solid var(--primary);">
-            <h3 style="color: var(--highlight);">🔑 <span class="tx" data-es="Actividad 2: El Acertijo del Guardián" data-en="Activity 2: The Guardian's Riddle">Actividad 2: El Acertijo del Guardián</span></h3>
-            
-            <!-- INTERACTIVE RIDDLE PICTURES (Requested Adjustment 1) -->
-            <div id="riddle-visual-container" style="display: flex; justify-content: center; align-items: center; margin-bottom: 15px; min-height: 140px; background: rgba(0,0,0,0.03); border-radius: 15px; border: 2px dashed var(--border); padding: 10px;"></div>
-            
-            <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
-                <p id="logic-question" style="font-size: 19px; font-style: italic; min-height: 110px; text-align: left; border-left: 5px solid var(--primary); padding-left: 15px; line-height: 1.5;"></p>
-                <div style="display: flex; align-items: center; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
-                    <div style="text-align: center;">
-                        <label style="font-weight: bold;" class="tx" data-es="Num:" data-en="Num:">Num:</label><br>
-                        <input type="number" id="logic-num" placeholder="?">
-                    </div>
-                    <span style="font-size: 40px; font-weight: bold; color: var(--secondary);">/</span>
-                    <div style="text-align: center;">
-                        <label style="font-weight: bold;" class="tx" data-es="Den:" data-en="Den:">Den:</label><br>
-                        <input type="number" id="logic-den" placeholder="?">
-                    </div>
-                </div>
+      <div class="activity-box" style="border: 2px solid var(--primary);">
+    <h3 style="color: var(--highlight);">🔑 <span class="tx" data-es="Actividad 2: El Acertijo del Guardián" data-en="Activity 2: The Guardian's Riddle">Actividad 2: El Acertijo del Guardián</span></h3>
+    
+    <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+        <p id="logic-question" style="font-size: 19px; font-style: italic; min-height: 110px; text-align: left; border-left: 5px solid var(--primary); padding-left: 15px; line-height: 1.5;"></p>
+        <div style="display: flex; align-items: center; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
+            <div style="text-align: center;">
+                <label style="font-weight: bold;" class="tx" data-es="Num:" data-en="Num:">Num:</label><br>
+                <input type="number" id="logic-num" placeholder="?">
             </div>
-            <button class="btn-3d" style="background: var(--success); color: white; width: 100%;" onclick="checkLogicPuzzle()">✅ <span class="tx" data-es="Revisar Acertijo" data-en="Check Riddle">Revisar Acertijo</span></button>
-            <span id="logic-feedback" class="feedback"></span>
-            <div id="code-tab1" class="code-reveal"><span class="tx" data-es="Código Desbloqueado:" data-en="Unlocked Code:">Código Desbloqueado:</span> 1234</div>
-            
-            <!-- PESTAÑA 1 INFO/TIP -->
-            <div class="tip-card-a">
-                <span class="tx" data-es="💡 <strong>Tip de Aventurero:</strong> ¿Sabías que la palabra 'fracción' proviene del latín <em>fractio</em> que significa 'romper o quebrar'? ¡Estamos dividiendo un entero en partes exactamente iguales!" data-en="💡 <strong>Adventurer's Tip:</strong> Did you know that the word 'fraction' comes from the Latin <em>fractio</em> which means 'to break'? We are dividing a whole into exactly equal parts!">💡 <strong>Tip de Aventurero:</strong> ¿Sabías que la palabra 'fracción' proviene del latín <em>fractio</em> que significa 'romper o quebrar'? ¡Estamos dividiendo un entero en partes exactamente iguales!</span>
-            </div>
-
-            <div class="info-box" style="margin-top: 30px;">
-                <strong>💡 <span class="tx" data-es="Reflexión de inicio:" data-en="Starting Reflection:">Reflexión de inicio:</span></strong> 
-                <span class="tx" data-es="¿Están listos para descubrir cómo las matemáticas moldean el mundo que nos rodea? Resuelvan los acertijos para avanzar." data-en="Are you ready to discover how math shapes the world around us? Solve the puzzles to advance.">¿Están listos para descubrir cómo las matemáticas moldean el mundo que nos rodea? Resuelvan los acertijos para avanzar.</span>
+            <span style="font-size: 40px; font-weight: bold; color: var(--secondary);">/</span>
+            <div style="text-align: center;">
+                <label style="font-weight: bold;" class="tx" data-es="Den:" data-en="Den:">Den:</label><br>
+                <input type="number" id="logic-den" placeholder="?">
             </div>
         </div>
+    </div>
+    
+    <button class="btn-3d" style="background: var(--success); color: white; width: 100%; margin-bottom: 15px;" onclick="checkLogicPuzzle()">✅ <span class="tx" data-es="Revisar Acertijo" data-en="Check Riddle">Revisar Acertijo</span></button>
+    <span id="logic-feedback" class="feedback"></span>
+
+    <!-- GRÁFICA INTERACTIVA MOVIDA DEBAJO DEL BOTÓN -->
+    <div id="riddle-visual-container" style="display: flex; justify-content: center; align-items: center; margin-bottom: 15px; min-height: 140px; background: rgba(0,0,0,0.03); border-radius: 15px; border: 2px dashed var(--border); padding: 10px;"></div>
+    
+    <div id="code-tab1" class="code-reveal"><span class="tx" data-es="Código Desbloqueado:" data-en="Unlocked Code:">Código Desbloqueado:</span> 1234</div>
+    
+    <!-- PESTAÑA 1 INFO/TIP -->
+    <div class="tip-card-a">
+        <span class="tx" data-es="💡 <strong>Tip de Aventurero:</strong> ¿Sabías que la palabra 'fracción' proviene del latín <em>fractio</em> que significa 'romper o quebrar'? ¡Estamos dividiendo un entero en partes exactamente iguales!" data-en="💡 <strong>Adventurer's Tip:</strong> Did you know that the word 'fraction' comes from the Latin <em>fractio</em> which means 'to break'? We are dividing a whole into exactly equal parts!">💡 <strong>Tip de Aventurero:</strong> ¿Sabías que la palabra 'fracción' proviene del latín <em>fractio</em> que significa 'romper o quebrar'? ¡Estamos dividiendo un entero en partes exactamente iguales!</span>
+    </div>
+
+    <div class="info-box" style="margin-top: 30px;">
+        <strong>💡 <span class="tx" data-es="Reflexión de inicio:" data-en="Starting Reflection:">Reflexión de inicio:</span></strong> 
+        <span class="tx" data-es="¿Están listos para descubrir cómo las matemáticas moldean el mundo que nos rodea? Resuelvan los acertijos para avanzar." data-en="Are you ready to discover how math shapes the world around us? Solve the puzzles to advance.">¿Están listos para descubrir cómo las matemáticas moldean el mundo que nos rodea? Resuelvan los acertijos para avanzar.</span>
     </div>
 </div>
 
@@ -1294,101 +1294,124 @@
     }
 
     function generateShape() {
-        playSound('click');
-        const s = document.getElementById('build-shape').value;
-        const d = parseInt(document.getElementById('build-den').value);
-        const qty = parseInt(document.getElementById('build-qty').value);
-        const col = document.getElementById('build-color').value;
-        
-        if(d < 1 || qty < 1 || qty > 5) {
-            alert(isEnglish ? "Please select valid dimensions." : "Por favor selecciona dimensiones válidas.");
-            return;
-        }
+    playSound('click');
+    const shape = document.getElementById('build-shape').value;
+    const qty = parseInt(document.getElementById('build-qty').value);
+    const den = parseInt(document.getElementById('build-den').value);
+    const color = document.getElementById('build-color').value;
+    const container = document.getElementById('shape-container');
+    
+    container.innerHTML = '';
+    
+    // Si manejas una variable global para contar los pedazos seleccionados, se reinicia aquí:
+    if(typeof window.tab2SelectedSlices !== 'undefined') window.tab2SelectedSlices = 0;
 
-        const container = document.getElementById('shape-container');
-        container.innerHTML = '';
+    for (let i = 0; i < qty; i++) {
+        let svgNS = "http://www.w3.org/2000/svg";
+        let svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("width", "160");
+        svg.setAttribute("height", "160");
+        svg.setAttribute("viewBox", "0 0 200 200");
+        svg.style.margin = "10px";
+        svg.style.filter = "drop-shadow(2px 4px 6px rgba(0,0,0,0.1))";
 
-        for (let fig = 0; fig < qty; fig++) {
-            let figBox = document.createElement('div');
-            figBox.style.width = '180px';
-            figBox.style.height = '180px';
-            figBox.style.position = 'relative';
-
-            let svgNS = "http://www.w3.org/2000/svg";
-            let svg = document.createElementNS(svgNS, "svg");
-            svg.setAttribute("width", "100%");
-            svg.setAttribute("height", "100%");
-            svg.setAttribute("viewBox", "0 0 100 100");
-
-            if (s === 'circular') {
-                for (let i = 0; i < d; i++) {
+        if (shape === 'circular') {
+            
+            // --- CORRECCIÓN: Si la división es 1 (Un entero completo) ---
+            if (den === 1) {
+                let circle = document.createElementNS(svgNS, "circle");
+                circle.setAttribute("cx", "100");
+                circle.setAttribute("cy", "100");
+                circle.setAttribute("r", "90");
+                circle.setAttribute("fill", "var(--surface)");
+                circle.setAttribute("stroke", "var(--secondary)");
+                circle.setAttribute("stroke-width", "4");
+                circle.style.cursor = "pointer";
+                circle.onclick = function() {
+                    playSound('click');
+                    if (this.getAttribute("fill") === "var(--surface)") {
+                        this.setAttribute("fill", color);
+                        if(typeof window.tab2SelectedSlices !== 'undefined') window.tab2SelectedSlices++;
+                    } else {
+                        this.setAttribute("fill", "var(--surface)");
+                        if(typeof window.tab2SelectedSlices !== 'undefined') window.tab2SelectedSlices--;
+                    }
+                };
+                svg.appendChild(circle);
+                
+            } else {
+                // --- LÓGICA ORIGINAL: Para múltiples divisiones (Arcos) ---
+                for (let j = 0; j < den; j++) {
                     let path = document.createElementNS(svgNS, "path");
-                    let angle1 = (i * 360 / d) * Math.PI / 180;
-                    let angle2 = ((i + 1) * 360 / d) * Math.PI / 180;
-                    let x1 = 50 + 45 * Math.cos(angle1);
-                    let y1 = 50 + 45 * Math.sin(angle1);
-                    let x2 = 50 + 45 * Math.cos(angle2);
-                    let y2 = 50 + 45 * Math.sin(angle2);
+                    // Ajuste de ángulos para que empiece desde arriba (-90 grados)
+                    let startAngle = (j * 360 / den - 90) * (Math.PI / 180);
+                    let endAngle = ((j + 1) * 360 / den - 90) * (Math.PI / 180);
                     
-                    let dAttr = `M 50 50 L ${x1} ${y1} A 45 45 0 ${ (360/d) > 180 ? 1 : 0 } 1 ${x2} ${y2} Z`;
-                    path.setAttribute("d", dAttr);
+                    let x1 = 100 + 90 * Math.cos(startAngle);
+                    let y1 = 100 + 90 * Math.sin(startAngle);
+                    let x2 = 100 + 90 * Math.cos(endAngle);
+                    let y2 = 100 + 90 * Math.sin(endAngle);
+                    
+                    let largeArc = (360 / den) > 180 ? 1 : 0;
+                    let d = `M 100 100 L ${x1} ${y1} A 90 90 0 ${largeArc} 1 ${x2} ${y2} Z`;
+                    
+                    path.setAttribute("d", d);
                     path.setAttribute("fill", "var(--surface)");
                     path.setAttribute("stroke", "var(--secondary)");
-                    path.setAttribute("stroke-width", "1.5");
-                    path.setAttribute("class", "canvas-slice");
-                    path.style.cursor = 'pointer';
-                    path.style.transition = 'fill 0.3s';
+                    path.setAttribute("stroke-width", "3");
+                    path.style.cursor = "pointer";
                     path.onclick = function() {
                         playSound('click');
-                        this.classList.toggle('active');
-                        if (this.classList.contains('active')) {
-                            this.setAttribute("fill", col);
+                        if (this.getAttribute("fill") === "var(--surface)") {
+                            this.setAttribute("fill", color);
+                            if(typeof window.tab2SelectedSlices !== 'undefined') window.tab2SelectedSlices++;
                         } else {
                             this.setAttribute("fill", "var(--surface)");
+                            if(typeof window.tab2SelectedSlices !== 'undefined') window.tab2SelectedSlices--;
                         }
                     };
                     svg.appendChild(path);
                 }
-            } else {
-                // Diseño de división de rebanadas cuadradas
-                const rows = Math.ceil(Math.sqrt(d));
-                const cols = Math.ceil(d / rows);
-                const w = 90 / cols;
-                const h = 90 / rows;
-                let count = 0;
-                for (let r = 0; r < rows; r++) {
-                    for (let c = 0; c < cols; c++) {
-                        if (count >= d) break;
-                        let rect = document.createElementNS(svgNS, "rect");
-                        rect.setAttribute("x", 5 + c * w);
-                        rect.setAttribute("y", 5 + r * h);
-                        rect.setAttribute("width", w - 1);
-                        rect.setAttribute("height", h - 1);
-                        rect.setAttribute("fill", "var(--surface)");
-                        rect.setAttribute("stroke", "var(--secondary)");
-                        rect.setAttribute("stroke-width", "1.5");
-                        rect.setAttribute("class", "canvas-slice");
-                        rect.style.cursor = 'pointer';
-                        rect.style.transition = 'fill 0.3s';
-                        rect.onclick = function() {
-                            playSound('click');
-                            this.classList.toggle('active');
-                            if (this.classList.contains('active')) {
-                                this.setAttribute("fill", col);
-                            } else {
-                                this.setAttribute("fill", "var(--surface)");
-                            }
-                        };
-                        svg.appendChild(rect);
-                        count++;
-                    }
+            }
+        } else if (shape === 'cuadrada') {
+            // --- LÓGICA PARA FORMAS CUADRADAS ---
+            let cols = Math.ceil(Math.sqrt(den));
+            let rows = Math.ceil(den / cols);
+            let w = 180 / cols;
+            let h = 180 / rows;
+            
+            let count = 0;
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (count >= den) break;
+                    let rect = document.createElementNS(svgNS, "rect");
+                    rect.setAttribute("x", 10 + c * w);
+                    rect.setAttribute("y", 10 + r * h);
+                    rect.setAttribute("width", w);
+                    rect.setAttribute("height", h);
+                    rect.setAttribute("fill", "var(--surface)");
+                    rect.setAttribute("stroke", "var(--secondary)");
+                    rect.setAttribute("stroke-width", "3");
+                    rect.setAttribute("rx", "5");
+                    rect.style.cursor = "pointer";
+                    rect.onclick = function() {
+                        playSound('click');
+                        if (this.getAttribute("fill") === "var(--surface)") {
+                            this.setAttribute("fill", color);
+                            if(typeof window.tab2SelectedSlices !== 'undefined') window.tab2SelectedSlices++;
+                        } else {
+                            this.setAttribute("fill", "var(--surface)");
+                            if(typeof window.tab2SelectedSlices !== 'undefined') window.tab2SelectedSlices--;
+                        }
+                    };
+                    svg.appendChild(rect);
+                    count++;
                 }
             }
-            figBox.appendChild(svg);
-            container.appendChild(figBox);
         }
+        container.appendChild(svg);
     }
-
+}
     // AJUSTE 2: Comprobación del taller guiado, sin revelación de respuestas
     function checkBuilder() {
         // Evaluar ranuras para palabras de estructura
